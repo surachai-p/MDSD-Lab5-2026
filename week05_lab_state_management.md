@@ -243,7 +243,7 @@ class MyApp extends StatelessWidget {
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
 ```text
-
+ไม่สามารถส่งผ่านข้อมูล `_savedItems` และฟังก์ชัน `_onSave` ผ่าน constructor ได้ตามปกติ เนื่องจาก `FavoritesPage` ถูกสร้างและ push แยกไปอยู่อีก Route หนึ่งบน Navigation Stack (ไม่ได้อยู่ในลำดับ parent-child ของ Widget Tree เดียวกันกับ `HomePage`) หากต้องใช้วิธีส่งพารามิเตอร์แบบเดิมจะต้องส่ง callback หรือ arguments ข้ามไปมาเมื่อ push/pop Route ซึ่งซับซ้อนมาก และเสี่ยงต่อการเกิดข้อมูลไม่ตรงกันระหว่างหน้าจอ
 ```
 
 ---
