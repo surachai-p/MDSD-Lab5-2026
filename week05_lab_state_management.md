@@ -528,7 +528,55 @@ class HomePage extends StatelessWidget {
 
 บันทึกคำตอบที่ได้จาก Gemini 
 
-```text
+```
+การเลือกใช้ State Management
+ให้เหมาะสมกับโจทย์แต่ละข้อจะช่วยให้แอปมีประสิทธิภาพสูง โค้ดไม่อ่านยาก
+และดูแลรักษาง่ายครับ นี่คือบทวิเคราะห์สำหรับทั้ง 3 ฟีเจอร์:
+
+1. Dark Mode / Light Mode (เปลี่ยนธีมทั้งแอป)
+
+  - เครื่องมือที่แนะนำ: Riverpod หรือ Provider
+  - เหตุผล:
+      - ฟีเจอร์นี้เป็น Global State ที่กระทบกับทุก Widget และทุกหน้าจอในแอป
+      - หากใช้ setState จะต้องส่งค่าธีมและฟังก์ชันเปลี่ยนธีมผ่าน Parameter
+        ลงไปเรื่อย ๆ (Prop Drilling) ซึ่งทำให้โค้ดรกรุงรัง และการสั่ง setState
+        ที่ Root Widget เพื่อเปลี่ยนธีมจะสั่ง Rebuild ทั้งแอปโดยไม่จำเป็น
+      - การใช้ Riverpod / Provider จะช่วยให้ทุกหน้าจอเข้าถึงและฟัง (Listen)
+        ค่าธีมปัจจุบันได้โดยตรง และเมื่อมีการเปลี่ยนธีม แอปจะ Rebuild
+        เฉพาะส่วนที่จำเป็นเท่านั้น
+
+2. ตัวนับ "มีคนถูกใจกี่คน" (ซิงค์ระหว่างหน้ารายการกับหน้ารายละเอียด)
+
+  - เครื่องมือที่แนะนำ: Riverpod (หรือ Provider)
+  - เหตุผล:
+      - ฟีเจอร์นี้เป็น Shared/Domain State ที่ต้องแชร์ข้อมูลร่วมกันระหว่าง 2
+        หน้าจอ (List View และ Detail View)
+      - หากใช้ setState คุณจะต้องเขียนโค้ดส่งค่ากลับไปกลับมาตอน Pop หน้าจอ (เช่น
+        Navigator.pop(context, result)) ซึ่งจัดการยากและเสี่ยงต่อการเกิด Bug
+        ข้อมูลไม่ตรงกัน
+      - Riverpod จะโดดเด่นมากในข้อนี้ โดยสามารถใช้ NotifierProvider.family
+        เพื่อสร้าง State แยกตาม productId ได้ เมื่อกดถูกใจในหน้ารายละเอียด State
+        ของสินค้านั้นจะเปลี่ยน
+        ส่งผลให้ไอเทมชิ้นเดียวกันในหน้ารายการอัปเดตตามทันทีแบบเรียลไทม์
+
+3. Animation กระพริบของไอคอนหัวใจ (แสดงเฉพาะใน Widget เดียว)
+
+  - เครื่องมือที่แนะนำ: setState (ร่วมกับ AnimationController)
+  - เหตุผล:
+      - ฟีเจอร์นี้เป็น Local State หรือ Ephemeral State ที่เกิดขึ้นชั่วคราว
+        ใช้เฉพาะภายใน Widget นั้น และไม่มี Widget อื่นต้องมารับรู้ด้วย
+      - Animation จำเป็นต้องทำงานร่วมกับ Lifecycle ของตัวมันเอง (เช่น
+        TickerProviderStateMixin, AnimationController.dispose())
+      - การใช้ setState ใน Widget เล็ก ๆ นี้ มีประสิทธิภาพสูงที่สุด
+        เขียนง่ายที่สุด และไม่ออกแบบซับซ้อนเกินความจำเป็น (Over-engineering)
+        โดยการ rebuild จะเกิดขึ้นแค่ภายในไอคอนหัวใจเท่านั้น ไม่กระทบส่วนอื่น
+
+💡 สรุปภาพรวมการสถาปนาแอป (Architecture Summary)
+
+  - Local / UI State (Animation, Form Validation) ➔ ใช้ setState
+  - Global / Shared State (Theme, User Profile, Like Counter Sync) ➔ ใช้
+    Riverpod (แนะนำมากกว่า Provider สำหรับแอปใหม่เนื่องจากไม่มีข้อจำกัดเรื่อง
+    BuildContext และเขียน Unit Test ง่ายกว่า)
 
 ```
 
