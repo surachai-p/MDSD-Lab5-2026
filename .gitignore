@@ -1,0 +1,57 @@
+# Miscellaneous / OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.log
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+
+# Flutter & Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+lib/generated_plugin_registrants.dart
+
+# IDE & Editor files
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+
+# Android
+.gradle/
+local.properties
+**/android/app/debug/
+**/android/app/release/
+**/android/app/profile/
+**/android/key.properties
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# iOS / macOS
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral/
+**/macos/Flutter/ephemeral/
+**/macos/Pods/
+
+# Windows & Linux
+**/windows/flutter/ephemeral/
+**/linux/flutter/ephemeral/
