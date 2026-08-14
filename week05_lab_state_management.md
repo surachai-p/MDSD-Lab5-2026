@@ -243,7 +243,7 @@ class MyApp extends StatelessWidget {
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
 ```text
-
+ข้อมูลระหว่างสองหน้าจอจะไม่ซิงค์กัน ถ้าส่งตัวแปรและฟังก์ชันข้าม Route จะทำให้โค้ดซับซ้อน และถ้าผู้ใช้มีการแก้ไขข้อมูลในหน้า FavoritesPage เช่น ลบสินค้าออก หน้า HomePage จะไม่รับรู้และไม่อัปเดตหน้าจอตาม
 ```
 
 ---
@@ -500,9 +500,10 @@ class HomePage extends StatelessWidget {
 
 > ✅ **Checkpoint 2.2** ทดสอบว่าเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกันทันที ลองกดปุ่มถังขยะลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง ถ่ายภาพหน้าจอทั้งสองหน้าเทียบกันแนบส่ง
 
-```image
+image
+<img width="1918" height="409" alt="image" src="https://github.com/user-attachments/assets/8d900754-2601-46ed-bed1-823796991d93" />
 
-```
+<img width="1919" height="464" alt="image" src="https://github.com/user-attachments/assets/bb66fc7f-36b2-480b-b894-00a2a81311f3" />
 
 ---
 
@@ -526,6 +527,26 @@ class HomePage extends StatelessWidget {
 
 ```text
 
+สำหรับการพัฒนาแอป Campus Marketplace ด้วย Flutter การเลือกเครื่องมือจัดการ State ที่เหมาะสมกับ "ขอบเขต (Scope)" ของข้อมูลจะช่วยให้แอปลื่นไหลและโค้ดสะอาดครับ นี่คือบทวิเคราะห์ครับ:
+1. Dark Mode / Light Mode
+ควรใช้: Riverpod (หรือ Provider)
+เหตุผล: เป็น Global State ที่ส่งผลกระทบต่อทุก Widget ในแอปพลิเคชัน การใช้ Riverpod จะช่วยให้คุณเปลี่ยน Theme ได้จากทุกหน้าจอ (เช่น หน้า Setting) และ Widget อื่นๆ จะ Rebuild ตามทันทีโดยไม่ต้องส่งค่าผ่าน Constructor (Prop Drilling)
+ทำไมไม่ใช้ setState: เพราะ setState ทำงานเฉพาะในระดับหน้าจอเดียว ไม่สามารถสั่งให้หน้าจออื่นที่ถูกโหลดไว้แล้วเปลี่ยนสีตามได้ง่ายๆ
+2. ตัวนับ "คนถูกใจ" (ซิงค์ระหว่างหน้า List และ Detail)
+ควรใช้: Riverpod (หรือ Provider)
+เหตุผล: เป็น Shared State ข้อมูลชุดเดียวกัน (สินค้า ID นี้) ถูกแสดงผลในสองหน้าจอที่ต่างกัน หากผู้ใช้กดถูกใจในหน้ารายละเอียด เมื่อกด Back กลับมาหน้ารายการ ข้อมูลต้องเป็นตัวเลขล่าสุดทันที การใช้ Riverpod (เช่น NotifierProvider) จะทำหน้าที่เป็น "แหล่งข้อมูลกลาง" ที่ทั้งสองหน้าจอมาคอยฟัง (Watch) อยู่
+ทำไมไม่ใช้ setState: การใช้ setState จะทำให้ข้อมูลไม่ซิงค์กัน (หน้าหนึ่งเปลี่ยน อีกหน้าไม่เปลี่ยน) เว้นแต่จะเขียน Callback ส่งไปมาซึ่งจะซับซ้อนและจัดการยากมากเมื่อแอปขยายตัว
+3. Animation กระพริบของไอคอนหัวใจ (ใน Widget เดียว)
+ควรใช้: setState (ร่วมกับ AnimationController)
+เหตุผล: เป็น Ephemeral State (State ชั่วคราว) ที่เกิดขึ้นและจบลงภายใน Widget เดียว ไม่มีความจำเป็นต้องให้ส่วนอื่นของแอปมารับรู้ว่าหัวใจกำลังกระพริบอยู่กี่เปอร์เซ็นต์ การใช้ setState ภายใน StatefulWidget เพื่อสั่ง Rebuild เฟรมของ Animation มีประสิทธิภาพสูงสุด (Performance) และเขียนโค้ดสั้นที่สุดสำหรับกรณีนี้
+ทำไมไม่ใช้ Riverpod: การนำ Logic ของ Animation ไปไว้ใน Global State Manager จะทำให้เกิด Boilerplate (โค้ดส่วนเกิน) มากเกินไป และอาจทำให้เกิดการ Rebuild ที่ไม่จำเป็นในระดับที่ใหญ่เกินไป
+สรุปคำแนะนำ:
+ฟีเจอร์	เครื่องมือที่แนะนำ	ประเภทของ State
+1. Dark/Light Mode	Riverpod	Global State (ทั้งแอป)
+2. ตัวนับถูกใจ (Sync)	Riverpod	Shared State (ข้ามหน้าจอ)
+3. Animation หัวใจ	setState	Local / Ephemeral State (ในตัวมันเอง)
+คำแนะนำเพิ่มเติม: หากโครงการนี้เป็นโปรเจกต์ใหม่ แนะนำให้เริ่มด้วย Riverpod เป็นหลักครับ เพราะจัดการเรื่องการล้าง Memory (AutoDispose) ได้ดีกว่า Provider และรองรับการทำ Unit Test ได้ง่ายกว่าสำหรับระบบ Marketplace ที่มี Logic ซับซ้อนในอนาคตครับ
+
 ```
 
 
@@ -536,12 +557,51 @@ class HomePage extends StatelessWidget {
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
 ```text
-
+มีการแบ่งประเภทของ State อย่างชัดเจนตามทฤษฎี ได้แก่ Ephemeral State (Local) และ App State (Global/Shared) ซึ่งสอดคล้องกับหลักการทำงานของ Flutter
+คำตอบของ AI อธิบายถึง ประเภทของ State แต่ยังไม่ได้อธิบายลึกถึงตำแหน่งขอบเขตใน Widget Tree อย่างเป็นรูปธรรม เช่น ไม่ได้ระบุว่าควรเอา Provider ไปครอบไว้ที่ระดับบนสุด ของแอป หรือครอบไว้เฉพาะเหนือหน้า List และ Detail
 ```
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
 ```text
-
-
+สำหรับการใช้ Riverpod คำตอบอาจจะทำให้คุณแปลกใจเล็กน้อย หากคุณคุ้นเคยกับ Provider (Package เดิม) เพราะแนวคิดเรื่อง "การประกาศไว้ที่ไหนใน Widget Tree" ของ Riverpod นั้นต่างออกไปครับ
+นี่คือคำแนะนำตามแนวทาง Best Practice ของ Riverpod:
+1. ตำแหน่งการประกาศ (The Declaration)
+ใน Riverpod คุณ ไม่จำเป็น ต้องประกาศ Provider ไว้ที่ตำแหน่งใดตำแหน่งหนึ่งใน Widget Tree (เช่น ไม่ต้องเอาไปครอบเหนือ ListView หรือ MaterialApp เหมือนใน Provider package)
+วิธีที่ถูกต้อง: ให้ประกาศ Provider เป็น Global Variable (ตัวแปรสากล) ไว้ในไฟล์ Dart ไฟล์ใดไฟล์หนึ่ง (เช่น product_provider.dart)
+เหตุผล: Riverpod ออกแบบมาให้ Provider เป็น "Compile-time constant" ซึ่ง Widget จะเข้าถึงได้ผ่าน WidgetRef เท่านั้น การทำแบบนี้ช่วยให้เข้าถึงข้อมูลได้จากทุกที่โดยไม่ต้องกังวลเรื่อง BuildContext
+2. ขอบเขตใน Widget Tree (The ProviderScope)
+สิ่งเดียวที่คุณต้องทำใน Widget Tree คือการครอบจุดเริ่มต้นของแอปด้วย ProviderScope ในหน้า main.dart:
+code
+Dart
+void main() {
+  runApp(
+    const ProviderScope( // ครอบไว้ที่ระดับบนสุดจุดเดียวพอ
+      child: MyApp(),
+    ),
+  );
+}
+3. เทคนิคเพื่อให้ "ไม่กินทรัพยากรมากเกินไป" (Efficiency)
+เพื่อให้ตัวนับถูกใจซิงค์กันระหว่างหน้า List และ Detail โดยที่ยังประหยัดแรมและ CPU ให้ใช้เทคนิค 2 อย่างนี้คู่กัน:
+ก) ใช้ .family เพื่อแยก State ตามรายสินค้า
+แทนที่จะสร้าง State ก้อนใหญ่เก็บสินค้าทุกตัว ให้สร้าง Provider ที่รับ Product ID เข้าไป เพื่อแยก State ของใครของมัน
+ข) ใช้ .autoDispose เพื่อทำลาย State เมื่อไม่ได้ใช้
+เมื่อผู้ใช้ปิดหน้ารายละเอียด และเลื่อนหน้ารายการสินค้าจนสินค้าชิ้นนั้นหายไปจากจอ (Viewport) Riverpod จะลบข้อมูลนั้นออกจาก Memory ให้โดยอัตโนมัติ
+ตัวอย่างโค้ด:
+code
+Dart
+// ประกาศไว้ภายนอก Class (Global)
+// autoDispose: ลบข้อมูลเมื่อไม่มีหน้าจอไหนเปิดดูอยู่
+// family: ทำให้เราเรียกใช้โดยระบุ ID ได้ เช่น productLikeProvider(productId)
+final productLikeProvider = StateProvider.family.autoDispose<int, String>((ref, productId) {
+  // ในอนาคตดึงค่าเริ่มต้นจาก API หรือ Database ที่นี่ได้
+  return 0; 
+});
+การเรียกใช้งาน:
+หน้า List: ใน build เมธอดของ Item แต่ละชิ้น ให้ใช้ ref.watch(productLikeProvider(product.id))
+หน้า Detail: ใช้ ref.watch(productLikeProvider(product.id)) เช่นกัน
+สรุปเหตุผลด้านประสิทธิภาพ:
+Granular Rebuilds: เมื่อกดถูกใจสินค้า ID: A เฉพาะ Widget ที่ฟัง ID: A เท่านั้นที่จะ Rebuild (หน้า List เฉพาะแถวที่เกี่ยวข้อง และหน้า Detail) ส่วนสินค้า IDอื่น ๆ จะไม่ถูก Rebuild เลย
+Memory Management: ด้วย .autoDispose หากผู้ใช้ไม่อยู่ในหน้านั้นแล้ว State จะถูกเคลียร์ทิ้ง ไม่เกิด Memory Leak แม้สินค้าในตลาดนัดจะมีเป็นพันชิ้นก็ตาม
+No Prop Drilling: ไม่ต้องส่งค่า Count ผ่าน Constructor จากหน้า List ไปหน้า Detail ให้โค้ดซับซ้อนครับ
 ```
 
 ⚠️ **ข้อควรระวัง**: AI เป็นเครื่องมือช่วยคิด ไม่ใช่คำตอบสุดท้าย ผู้เรียนต้องอธิบายเหตุผลของการเลือกใช้เครื่องมือได้ด้วยตัวเองเสมอ ตามหลักการใช้ AI ในการพัฒนาซอฟต์แวร์ของวิชานี้
@@ -695,6 +755,15 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
 
+![Uploading image.png…]()
+
+ตอนใช้ Provider,เมื่อเปลี่ยนเป็น Riverpod,ความหมาย (ใช้ทำอะไร?)
+MultiProvider,ProviderScope,จุดเริ่มต้นแอป (ครอบ runApp ไว้เพื่อให้ใช้ State ได้)
+StatelessWidget,ConsumerWidget,คลาสหน้าจอ UI (เปลี่ยนเพื่อให้เข้าถึงตัวแปร ref ได้)
+ChangeNotifier,Notifier,คลาสจัดการ State (ใช้เก็บข้อมูลและเขียนฟังก์ชันเปลี่ยนค่า)
+context.watch<T>(),ref.watch(provider),ดึงค่ามาแสดงผล (UI จะ Rebuild อัตโนมัติเมื่อค่าเปลี่ยน)
+context.read<T>(),ref.read(provider.notifier),เรียกใช้ฟังก์ชัน (มักใช้ในปุ่มกด ไม่ทำให้ UI Rebuild)
+
 ---
 
 ## ส่วนที่ 5 (ทำด้วยตนเอง): ออกแบบฟีเจอร์เพิ่มด้วยตัวเอง
@@ -709,7 +778,8 @@ class HomePage extends ConsumerWidget {
 
 - ต้องตัดสินใจเองว่าค่าคำค้นหาควรเป็น Ephemeral State หรือ App State พร้อมให้เหตุผลสั้น ๆ ไว้ในช่องด้านล่าง
   ```text
-
+Ephemeral State
+ค้นหาสินค้า (Search Query) มีขอบเขตการใช้งานแค่ภายในหน้า Home หน้าเดียว เพื่อใช้กรองรายการที่แสดงผลเท่านั้น ไม่จำเป็นต้องแชร์ค่านี้ไปให้หน้าอื่น (เช่น หน้า Detail หรือ Favorites) รับรู้ การใช้แค่ StatefulWidget ควบคู่กับ setState จึงเหมาะสม เบาที่สุด และไม่เปลืองทรัพยากรในการสร้าง Global State โดยไม่จำเป็น
   ```
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
 
@@ -721,7 +791,9 @@ class HomePage extends ConsumerWidget {
 
 - ต้องใช้ `context.read` หรือ `context.watch` ให้ถูกต้องตามหลักการ และอธิบายเหตุผลการเลือก ในช่องด้านล่าง
   ```text
-
+ควรใช้ทั้ง context.watch และ context.read 
+1. ใช้ context.watch ในส่วนของการตรวจสอบเงื่อนไขเพื่อแสดงหรือซ่อนปุ่ม เพราะ UI จำเป็นต้องเฝ้าดูการเปลี่ยนแปลงของจำนวนรายการโปรดตลอดเวลา หากรายการเป็น 0 ปุ่มจะได้หายไปโดยอัตโนมัติ
+2. ใช้ context.read ภายในฟังก์ชัน onPressed ของปุ่ม ตอนที่เรียกเมธอด clear() เพราะการกดปุ่มคือการ Action ให้ทำงานเพียงครั้งเดียว ไม่จำเป็นต้องให้ตัวปุ่มมารอฟังการ Rebuild จากข้อมูลที่เปลี่ยนไป
 
   ```
 - ปุ่มต้องแสดงเฉพาะเมื่อมีรายการโปรดอย่างน้อย 1 รายการเท่านั้น (ถ้ารายการว่างอยู่แล้วไม่ต้องแสดงปุ่มนี้)
