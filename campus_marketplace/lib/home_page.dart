@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'models/item.dart';
+import 'models/favorites_model.dart';
 import 'widgets/item_list_section.dart';
+import 'favorites_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,30 +13,58 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<Item> _savedItems = []; // เก็บรายการโปรดไว้ใน State ของ HomePage เอง (ยังไม่ใช้ Provider)
-
-  void _onSave(Item item) {
-    setState(() {
-      _savedItems.add(item); // แก้ไข List แล้วสั่ง rebuild ทั้งทรีที่อยู่ใต้ HomePage
-    });
-  }
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
+    // กรองรายการสินค้าตามคำค้นหา (Ephemeral State)
+    final filteredCatalog = catalog.where((item) {
+      return item.title.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Campus Marketplace'),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: Center(child: Text('❤️ ${_savedItems.length}')),
+          IconButton(
+            icon: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.favorite),
+                Text(' ${context.watch<FavoritesModel>().itemCount}'),
+              ],
+            ),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const FavoritesPage()),
+            ),
           ),
         ],
       ),
-      body: ItemListSection(
-        catalog: catalog,       // มาจาก item.dart ที่สร้างไว้ในขั้นตอนที่ 1.1
-        savedItems: _savedItems, // ต้องส่งลงไปให้ ItemListSection แม้มันไม่ได้ใช้เอง
-        onSave: _onSave,         // ส่งฟังก์ชันลงไปเช่นกัน — รวมเป็น "Prop Drilling" 2 ชั้น
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: TextField(
+              decoration: const InputDecoration(
+                hintText: 'ค้นหาสินค้า...',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: ItemListSection(catalog: filteredCatalog),
+            ),
+          ),
+        ],
       ),
     );
   }
