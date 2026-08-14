@@ -708,7 +708,9 @@ class HomePage extends ConsumerWidget {
 <img width="1710" height="1112" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 11 36 21" src="https://github.com/user-attachments/assets/3e92e7a0-0006-421f-98e4-6c5e3e088d5f" />
 
 
-> ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
+> ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่
+เทียบ
+```
 | Provider                  | Riverpod                     | คำอธิบาย                                                                                |
 | ------------------------- | ---------------------------- | --------------------------------------------------------------------------------------- |
 | `ChangeNotifier`          | `StateNotifier`              | ใช้จัดการและเก็บ State โดย `StateNotifier` เหมาะกับการจัดการ State ในรูปแบบของ Riverpod |
@@ -717,7 +719,7 @@ class HomePage extends ConsumerWidget {
 | `context.read<T>()`       | `ref.read(provider)`         | ใช้เข้าถึง State หรือเรียกคำสั่งจาก Provider โดยไม่ต้องติดตามการเปลี่ยนแปลง             |
 | `ChangeNotifierProvider`  | `StateNotifierProvider`      | ใช้ประกาศ Provider เพื่อสร้างและเผยแพร่ State ให้ Widget ที่ต้องการใช้งาน               |
 | `Provider.of<T>(context)` | `ref.read()` / `ref.watch()` | Riverpod ใช้ `ref` แทนการค้นหา Provider ผ่าน `BuildContext`                             |
-
+```
 
 ---
 
