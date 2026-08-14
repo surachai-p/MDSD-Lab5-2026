@@ -245,7 +245,7 @@ class MyApp extends StatelessWidget {
 ```text
 
 ```
-
+ไม่สามารถส่งข้อมูลหรือซิงค์ State ข้าม Route ได้โดยตรง เนื่องจากโครงสร้างแบบ Prop Drilling รองรับการส่งผ่านข้อมูลผ่าน Constructor ได้เฉพาะความสัมพันธ์แบบพ่อ-ลูก (Parent-Child) ภายใน Widget Tree เดียวกันเท่านั้น เมื่อหน้า FavoritesPage ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะทำให้ไม่สามารถแชร์ข้อมูลรายการโปรดชุดเดียวกันระหว่างหน้าจอได้อย่างถูกต้อง
 ---
 
 ## ส่วนที่ 2: รีแฟกเตอร์ด้วย Provider
@@ -266,6 +266,7 @@ dependencies:
 ```bash
 flutter pub get
 ```
+<img width="1066" height="326" alt="image" src="https://github.com/user-attachments/assets/f0732416-bbc3-4106-be6c-b132ccc6e093" />
 
 ### ขั้นตอนที่ 2.2: สร้าง FavoritesModel
 
@@ -503,6 +504,9 @@ class HomePage extends StatelessWidget {
 ```image
 
 ```
+<img width="1919" height="1030" alt="image" src="https://github.com/user-attachments/assets/ff42f4d1-908c-44d2-88e0-07aeb3ab1c02" />
+<img width="1836" height="1019" alt="image" src="https://github.com/user-attachments/assets/0a70fd4c-b107-441a-8ca2-49e06cfe0d65" />
+<img width="1866" height="1006" alt="image" src="https://github.com/user-attachments/assets/fe68dd7a-131b-461b-b572-f834fa3e4f98" />
 
 ---
 
@@ -525,7 +529,19 @@ class HomePage extends StatelessWidget {
 บันทึกคำตอบที่ได้จาก Gemini 
 
 ```text
+บวิเคราะห์จาก Gemini:
 
+Dark Mode / Light Mode → ควรใช้ Provider หรือ Riverpod (App State)
+
+เหตุผล: เป็นข้อมูลการตั้งค่าระดับแอปพลิเคชัน (Global) ที่ส่งผลต่อธีมของทุกหน้าจอและทุก Widget หากใช้ setState จะไม่สามารถกระจายค่าไปยังหน้าอื่น ๆ ได้อย่างมีประสิทธิภาพ
+
+ตัวนับ "มีคนถูกใจแล้วกี่คน" (ซิงค์ข้ามหน้า) → ควรใช้ Provider หรือ Riverpod (App State)
+
+เหตุผล: ข้อมูลจำนวนคนถูกใจถูกแชร์และใช้งานร่วมกันในหลายหน้าจอ (รายการสินค้า และ หน้ารายละเอียดสินค้า) เมื่อมีการกดเพิ่ม/ลด ข้อมูลทุกหน้าต้องอัปเดตตรงกันทันที
+
+Animation กระพริบของไอคอนหัวใจตอนกดถูกใจ → ควรใช้ setState (Ephemeral State)
+
+เหตุผล: เป็นสถานะทางการแสดงผล (UI State) ที่เกิดขึ้นชั่วคราวเฉพาะภายในตัว Widget ไอคอนนั้น ๆ ตัวเดียว ไม่มี Widget อื่น หรือหน้าจออื่นต้องรับรู้ การใช้ setState จึงประหยัดทรัพยากรและเหมาะสมที่สุด
 ```
 
 
@@ -536,11 +552,11 @@ class HomePage extends StatelessWidget {
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
 ```text
-
+ความสอดคล้องกับบทเรียน: คำตอบของ Gemini ตรงกับกรอบการตัดสินใจในบทเรียนอย่างแม่นยำ โดยพิจารณาจาก ขอบเขตการมองเห็น (Scope) และ อายุการใช้งาน (Lifetime) ของข้อมูล
 ```
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
 ```text
-
+วิเคราะห์เพิ่มเติม: AI สามารถจำแนกความแตกต่างระหว่าง App State (ข้อมูลที่ต้องใช้ร่วมกันข้ามหน้า) กับ Ephemeral State (ข้อมูลการแสดงผลเฉพาะจุด) ได้อย่างเหมาะสม ช่วยป้องกันไม่ให้เกิดปัญหา Overhead จากการนำ State Management ไปใช้เกินความจำเป็น (Over-engineering)
 
 ```
 
@@ -716,6 +732,9 @@ class HomePage extends ConsumerWidget {
 ### โจทย์ที่ 2: ปุ่ม "ล้างรายการโปรดทั้งหมด"
 
 สังเกตว่า `FavoritesModel` มีเมธอด `clear()` เตรียมไว้ให้แล้วตั้งแต่ขั้นตอนที่ 2.2 แต่ยังไม่เคยถูกเรียกใช้งานจากที่ใดเลย ให้เพิ่มปุ่มในหน้า `FavoritesPage` ที่เรียกใช้เมธอดนี้ พร้อมแสดง Dialog ยืนยันก่อนล้างข้อมูลจริง (ใช้ `showDialog` + `AlertDialog`)
+<img width="1893" height="1025" alt="image" src="https://github.com/user-attachments/assets/e1da6867-921f-4d6b-9923-84d81712ae2f" />
+<img width="1907" height="1016" alt="image" src="https://github.com/user-attachments/assets/bb52f6c6-5056-4276-939f-927c25cf130f" />
+
 
 **ข้อกำหนด**
 
