@@ -240,11 +240,14 @@ class MyApp extends StatelessWidget {
 
 > ✅ **Checkpoint 1.1** รันแอปและกดปุ่ม "🤍 บันทึกเป็นรายการโปรด" ที่สินค้าชิ้นใดก็ได้ ทดสอบว่า (ก) ตัวเลขในไอคอนหัวใจที่ AppBar เพิ่มขึ้นถูกต้อง และ (ข) ปุ่มของสินค้าที่กดไปแล้วเปลี่ยนเป็น "❤️ บันทึกแล้ว" และกดซ้ำไม่ได้ ถ่ายภาพหน้าจอที่เห็นทั้งสองอย่างนี้พร้อมกัน แล้วเปิดไฟล์ `item_card.dart` และ `item_list_section.dart` ให้เห็น constructor ที่ต้องรับพารามิเตอร์ส่งต่อ (Prop Drilling) ชัดเจน แนบส่งในรายงาน
 
+
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
 ```text
-
+คำตอบ : เพราะหน้า FavoritesPage ถูก push แยกไปคนละ Route ทำให้เข้าถึง _savedItems ตรงๆไม่ได้ ต้องคอยส่งต่อข้อมูลผ่าน Constructor ตอนเปลี่ยนหน้า และถ้าในหน้า Favorites มีการกดแก้ไข จะต้องส่ง Callback ย้อนกลับมาอัปเดต State ที่ HomePage ซึ่งทำให้โค้ดยุ่งยาก ซับซ้อน
 ```
+![](https://github.com/user-attachments/assets/2457837f-5b37-472c-a794-4a8ff6fbfa98)
+![](https://github.com/user-attachments/assets/1d617b50-5863-4fb9-9fb7-7869cf1d3a85)
 
 ---
 
@@ -500,9 +503,14 @@ class HomePage extends StatelessWidget {
 
 > ✅ **Checkpoint 2.2** ทดสอบว่าเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกันทันที ลองกดปุ่มถังขยะลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง ถ่ายภาพหน้าจอทั้งสองหน้าเทียบกันแนบส่ง
 
-```image
+2.1
+![](https://github.com/user-attachments/assets/73a5a3f7-d01b-4615-9b99-6a05e074b9e3)
 
-```
+2.2
+![](https://github.com/user-attachments/assets/70dcab36-70a3-4df6-99a2-3509a3dd483b)
+![](https://github.com/user-attachments/assets/d406e917-e6e2-437f-95cd-8f634cb50229)
+![](https://github.com/user-attachments/assets/d1c99537-98b9-4e07-a8d6-b379378f9100)
+
 
 ---
 
@@ -525,7 +533,18 @@ class HomePage extends StatelessWidget {
 บันทึกคำตอบที่ได้จาก Gemini 
 
 ```text
-
+คำตอบ :
+1. Dark Mode / Light Mode
+ควรใช้: Riverpod (หรือ Provider)
+เหตุผล: ข้อมูลธีมเป็น Global State ที่ส่งผลกระทบต่อทุก Widget ในแอปพลิเคชัน การใช้ Riverpod (เช่น StateProvider หรือ NotifierProvider) จะช่วยให้คุณจัดการการเปลี่ยนธีมจากหน้าจอใดก็ได้ และส่งค่าไปยัง MaterialApp เพื่อเปลี่ยนสีทั้งแอปได้ทันที โดยไม่ต้องส่งผ่าน Constructor (Prop Drilling)
+2. ตัวนับ "มีคนถูกใจแล้วกี่คน" (ซิงค์ระหว่างหน้า)
+ควรใช้: Riverpod (หรือ Provider)
+เหตุผล: ข้อมูลนี้เป็น Shared State คือมีข้อมูลชุดเดียวแต่ต้องแสดงผลและอัปเดตในหลายหน้าจอ (หน้า List และหน้า Detail)
+หากคุณใช้ setState ในหน้า Detail เมื่อกดย้อนกลับมาหน้า List ค่าจะไม่เปลี่ยนตาม (เพราะหน้า List ไม่โดน Rebuild ใหม่พร้อมข้อมูลใหม่)
+การใช้ Riverpod จะมีตัวเก็บข้อมูลกลาง (Single Source of Truth) เมื่อหน้า Detail สั่งอัปเดต หน้า List ที่ฟัง (Watch) ข้อมูลชุดเดียวกันอยู่ก็จะขยับเลขตามโดยอัตโนมัติ
+3. Animation กระพริบของไอคอนหัวใจ (ตอนกดถูกใจ)
+ควรใช้: setState
+เหตุผล: เป็น Local State หรือ UI State ที่เกิดขึ้นและจบลงภายใน Widget เดียว (เฉพาะตัวปุ่มหัวใจ) การใช้ setState ร่วมกับ AnimationController นั้นเหมาะสมและมีประสิทธิภาพ (Performance) สูงสุดในกรณีนี้ เพราะการไปเรียกใช้ Provider/Riverpod เพื่อจัดการ Animation เล็กๆ จะทำให้ Logic ซับซ้อนเกินความจำเป็นและอาจทำให้เกิดการ Rebuild ในส่วนที่ไม่เกี่ยวข้องได้
 ```
 
 
@@ -536,13 +555,13 @@ class HomePage extends StatelessWidget {
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
 ```text
+คำตอบ : ตรงกันในเรื่อง Dark/Light Mode และ ตัวนับไลค์ที่ต้อง sync ข้ามหน้า Animation หัวใจกระพริบ 
+จุดที่ต่างคือ Gemini ข้ามจาก InheritedWidget ไปแนะนำ Riverpod ทันทีโดยไม่ผ่าน Provider ตามลำดับที่บทเรียนสอน และไม่ได้อธิบายเหตุผลเชิงลึกเรื่องปัญหา
 
 ```
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
-```text
-
-
-```
+![](https://github.com/user-attachments/assets/691c4403-d9ad-483f-920a-24f8bb5a8c30)
+![](https://github.com/user-attachments/assets/4ec0af91-93a7-4ec0-bf60-57db364034b4)
 
 ⚠️ **ข้อควรระวัง**: AI เป็นเครื่องมือช่วยคิด ไม่ใช่คำตอบสุดท้าย ผู้เรียนต้องอธิบายเหตุผลของการเลือกใช้เครื่องมือได้ด้วยตัวเองเสมอ ตามหลักการใช้ AI ในการพัฒนาซอฟต์แวร์ของวิชานี้
 
@@ -695,7 +714,24 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
 
+4.1
+![](https://github.com/user-attachments/assets/395b2a43-4749-4669-9c34-806f640dddd7)
+
+4.2
+| มิติการเปรียบเทียบ | Provider (ส่วนที่ 2)| Riverpod (ส่วนที่ 4) |
+| --- | --- | --- |
+| 1. คลาสจัดการ State | extends ChangeNotifier (แก้ไขค่าในตัวแปรเดิมแล้วเรียก notifyListeners()) | extends StateNotifier<T> (สร้างและแทนที่ด้วยก้อน State ใหม่แบบ Immutable) |
+| 2. การประกาศ Provider | ประกาศ/ลงทะเบียนไว้ใน Widget Tree (เช่น ใน main.dart หรือเหนือหน้านั้น) | ประกาศเป็นตัวแปรแบบ Top-level / Global variable นอกคลาส |
+| 3. ชนิดของ Widget ที่ใช้งาน |StatelessWidget / StatefulWidget (ต้องพึ่งพา BuildContext) | ConsumerWidget / ConsumerStatefulWidget (ส่ง WidgetRef ref เข้ามาในฟังก์ชัน build) |
+| 4. การดึงค่าและดักฟัง (Listen State) | context.watch<Model>() | ref.watch(provider) |
+| 5. การเรียกฟังก์ชันเพื่อแก้ State | context.read<Model>().method() | ref.read(provider.notifier).method() |
+
+
+
+
 ---
+
+
 
 ## ส่วนที่ 5 (ทำด้วยตนเอง): ออกแบบฟีเจอร์เพิ่มด้วยตัวเอง
 
@@ -709,7 +745,7 @@ class HomePage extends ConsumerWidget {
 
 - ต้องตัดสินใจเองว่าค่าคำค้นหาควรเป็น Ephemeral State หรือ App State พร้อมให้เหตุผลสั้น ๆ ไว้ในช่องด้านล่าง
   ```text
-
+คำตอบ : Ephemeral State เพราะข้อความคำค้นหา (Search Query) ถูกใช้งานอยู่แค่ภายในหน้า Home เพียงหน้าเดียว เพื่อใช้กรองรายการสินค้าที่จะแสดงผลในหน้านั้น ไม่ได้มีหน้าจออื่น (เช่น FavoritesPage) จำเป็นต้องแชร์หรืออ่านค่าคำค้นหานี้ด้วย การใช้เพียง setState ใน StatefulWidget จึงเป็นเครื่องมือที่เบา เรียบง่าย และเพียงพอต่อการใช้งาน โดยไม่จำเป็นต้องใช้ Provider
   ```
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
 
@@ -721,7 +757,7 @@ class HomePage extends ConsumerWidget {
 
 - ต้องใช้ `context.read` หรือ `context.watch` ให้ถูกต้องตามหลักการ และอธิบายเหตุผลการเลือก ในช่องด้านล่าง
   ```text
-
+context.read<FavoritesModel>().clear() เพราะการล้างข้อมูลเป็น Callback Action ที่เกิดขึ้นครั้งเดียวเมื่อผู้ใช้กดยืนยันใน Dialog ไม่ได้ต้องการให้ปุ่มหรือ Dialog คอย Subscribe/Rebuild ตัวเองตามการเปลี่ยนแปลงของข้อมูล ซึ่งตามหลักการจัดการ State ของ Provider หากเป็นการสั่งรันคำสั่ง (Event Trigger) ให้ใช้ context.read()
 
   ```
 - ปุ่มต้องแสดงเฉพาะเมื่อมีรายการโปรดอย่างน้อย 1 รายการเท่านั้น (ถ้ารายการว่างอยู่แล้วไม่ต้องแสดงปุ่มนี้)
@@ -731,7 +767,15 @@ class HomePage extends ConsumerWidget {
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) 
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์ ในช่องด้านล่าง
-```text
+
+![](https://github.com/user-attachments/assets/e75826c1-8e1a-4074-a475-63a5988d073d)
+![](https://github.com/user-attachments/assets/dcdfaa2d-2bf6-4033-a0fc-2c7d253b0937)
+![](https://github.com/user-attachments/assets/ad7619eb-0ccd-43e3-88c1-dbd4ca7d0f4b)
+![](https://github.com/user-attachments/assets/07c4c255-621d-462a-a08f-4a68a8b4d3e3)
+
+
+
+
 
 
 ```
