@@ -240,10 +240,18 @@ class MyApp extends StatelessWidget {
 
 > ✅ **Checkpoint 1.1** รันแอปและกดปุ่ม "🤍 บันทึกเป็นรายการโปรด" ที่สินค้าชิ้นใดก็ได้ ทดสอบว่า (ก) ตัวเลขในไอคอนหัวใจที่ AppBar เพิ่มขึ้นถูกต้อง และ (ข) ปุ่มของสินค้าที่กดไปแล้วเปลี่ยนเป็น "❤️ บันทึกแล้ว" และกดซ้ำไม่ได้ ถ่ายภาพหน้าจอที่เห็นทั้งสองอย่างนี้พร้อมกัน แล้วเปิดไฟล์ `item_card.dart` และ `item_list_section.dart` ให้เห็น constructor ที่ต้องรับพารามิเตอร์ส่งต่อ (Prop Drilling) ชัดเจน แนบส่งในรายงาน
 
+<img width="1919" height="1020" alt="image" src="https://github.com/user-attachments/assets/c9c45066-9367-42b9-9bae-7540a3c8f5a2" />
+
+<img width="1919" height="1021" alt="image" src="https://github.com/user-attachments/assets/bd347d50-3141-4b9a-9eb4-561e9c58befd" />
+
+
+
+
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
-```text
-
+```
+ข้อมูลที่บันทึกไว้จะถูกส่งผ่าน Props ได้เฉพาะใน Widget Tree เดิม ทำให้ FavoritesPage ที่เป็น Route
+ใหม่ไม่สามารถเข้าถึง _savedItems ได้โดยตรง ต้องส่งข้อมูลผ่านหลายชั้นหรือสร้าง State ซ้ำ 
 ```
 
 ---
@@ -504,6 +512,9 @@ class HomePage extends StatelessWidget {
 
 ```
 
+https://github.com/user-attachments/assets/d9d3954d-c2d8-4751-a99a-64bf032a6d00
+
+
 ---
 
 ## ส่วนที่ 3: ใช้ AI ช่วยเลือกแนวทาง State Management
@@ -525,7 +536,31 @@ class HomePage extends StatelessWidget {
 บันทึกคำตอบที่ได้จาก Gemini 
 
 ```text
-
+สำหรับการพัฒนาแอป Flutter ในปัจจุบัน การเลือกเครื่องมือจัดการ State (State Management) ให้เหมาะสมกับ "ขอบเขต" (Scope) ของข้อมูลเป็นเรื่องสำคัญมาก เพื่อให้โค้ดสะอาดและดูแลรักษาง่ายครับ
+นี่คือบทวิเคราะห์และคำแนะนำสำหรับแต่ละฟีเจอร์ครับ:
+1. Dark Mode / Light Mode (Global State)
+เครื่องมือที่แนะนำ: Riverpod (หรือ Provider)
+เหตุผล: ฟีเจอร์นี้เป็น Global State ที่ส่งผลกระทบต่อทุก Widget ในแอปพลิเคชัน (ตั้งแต่ระดับ MaterialApp) การใช้ Riverpod จะช่วยให้คุณเข้าถึงและเปลี่ยนแปลงค่า Theme ได้จากทุกที่ในแอปโดยไม่ต้องส่งผ่าน Constructor (Constructor Drilling) และจัดการเรื่องการบันทึกค่าลงเครื่อง (Persistence) ได้ง่ายกว่า
+2. ตัวนับ "มีคนถูกใจแล้ว" (Shared State)
+เครื่องมือที่แนะนำ: Riverpod (หรือ Provider)
+เหตุผล: ฟีเจอร์นี้คือ Shared State หรือข้อมูลที่ต้องซิงค์กันระหว่าง 2 หน้า (List View และ Detail View)
+ถ้าใช้ setState ข้อมูลจะเปลี่ยนแค่ในหน้าเดียว เมื่อกดย้อนกลับมาหน้าก่อนหน้า ข้อมูลจะไม่ถูกอัปเดต (เว้นแต่จะใช้ Callback ซึ่งซับซ้อนและจัดการยาก)
+Riverpod จะช่วยสร้าง "แหล่งข้อมูลเดียว" (Single Source of Truth) เมื่อคุณกดถูกใจในหน้ารายละเอียด ข้อมูลใน Provider จะเปลี่ยน และหน้ารายการที่ฟัง (Watch) ข้อมูลชุดเดียวกันนี้อยู่จะอัปเดตตามโดยอัตโนมัติ
+3. Animation กระพริบของไอคอนหัวใจ (Local / Ephemeral State)
+เครื่องมือที่แนะนำ: setState
+เหตุผล: ฟีเจอร์นี้เป็น Ephemeral State หรือสถานะชั่วคราวที่ใช้เฉพาะจุด
+Animation ที่เกิดขึ้นเฉพาะในตัว Widget หัวใจเอง ไม่จำเป็นต้องบอกให้หน้าอื่นรู้ หรือแชร์ให้ใครทราบ
+การใช้ setState ร่วมกับ AnimationController ภายใน StatefulWidget นั้นมีประสิทธิภาพสูงที่สุดและเขียนโค้ดได้กระชับที่สุดสำหรับกรณีนี้ การเอา Animation State ไปไว้ใน Provider/Riverpod จะทำให้แอปทำงานหนักเกินความจำเป็น (Overhead)
+สรุปตารางเปรียบเทียบ
+ฟีเจอร์	เครื่องมือที่แนะนำ	เหตุผลหลัก
+Dark/Light Mode	Riverpod	เป็นสถานะระดับแอป (Global) ต้องเข้าถึงได้จากทุกหน้า
+ตัวนับถูกใจ (Sync ข้ามหน้า)	Riverpod	ต้องซิงค์ข้อมูลให้ตรงกันระหว่างหน้า List และ Detail
+Animation หัวใจกระพริบ	setState	เป็น UI Logic เฉพาะตัว Widget นั้นๆ ไม่เกี่ยวกับข้อมูลหลัก
+คำแนะนำเพิ่มเติม:
+หากโปรเจกต์ของคุณมีขนาดกลางถึงใหญ่ แนะนำให้ใช้ Riverpod เป็นหลัก แทน Provider ครับ เพราะ:
+Riverpod ไม่ขึ้นกับ BuildContext: ทำให้คุณสามารถจัดการ Logic นอก Widget ได้ง่ายกว่า (เช่น ในชั้น Service หรือ Repository)
+ความปลอดภัย (Type Safe): ลดโอกาสเกิด Error ประเภท "ProviderNotFoundException" ในตอน Runtime
+ทดสอบง่าย (Testability): การเขียน Unit Test สำหรับ Logic การกดถูกใจหรือการเปลี่ยน Theme จะทำได้ง่ายกว่ามากครับ
 ```
 
 
@@ -536,6 +571,10 @@ class HomePage extends StatelessWidget {
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
 ```text
+
+Gemini แนะนำสอดคล้องกับกรอบการตัดสินใจในบทเรียนโดยรวม เพราะเลือกเครื่องมือ State Management ตามขอบเขตของ State ได้แก่ Global, Shared และ Local State โดย Dark/Light Mode ใช้ Riverpod หรือ Provider, ตัวนับจำนวนคนถูกใจใช้ State Management สำหรับข้อมูลที่แชร์ร่วมกัน และ Animation ใช้ setState ซึ่งเป็น Local State
+
+จุดที่แตกต่างคือ Gemini เน้น Riverpod เป็นตัวเลือกหลัก และอธิบายข้อดีเพิ่มเติม เช่น Type Safety, Testability, Persistence และ Single Source of Truth ขณะที่กรอบในบทเรียนเน้นหลักการว่า ควรเลือกเครื่องมือให้เหมาะสมกับ Scope ของ State มากกว่าการกำหนดว่าเครื่องมือใดดีที่สุด ดังนั้น Gemini มีแนวคิดหลักตรงกับบทเรียน แต่ให้รายละเอียดเชิงเทคนิคและการประยุกต์ใช้จริงมากกว่า
 
 ```
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
