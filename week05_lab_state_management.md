@@ -239,11 +239,15 @@ class MyApp extends StatelessWidget {
 ```
 
 > ✅ **Checkpoint 1.1** รันแอปและกดปุ่ม "🤍 บันทึกเป็นรายการโปรด" ที่สินค้าชิ้นใดก็ได้ ทดสอบว่า (ก) ตัวเลขในไอคอนหัวใจที่ AppBar เพิ่มขึ้นถูกต้อง และ (ข) ปุ่มของสินค้าที่กดไปแล้วเปลี่ยนเป็น "❤️ บันทึกแล้ว" และกดซ้ำไม่ได้ ถ่ายภาพหน้าจอที่เห็นทั้งสองอย่างนี้พร้อมกัน แล้วเปิดไฟล์ `item_card.dart` และ `item_list_section.dart` ให้เห็น constructor ที่ต้องรับพารามิเตอร์ส่งต่อ (Prop Drilling) ชัดเจน แนบส่งในรายงาน
+<img width="1297" height="987" alt="สกรีนช็อต 2026-08-14 143410" src="https://github.com/user-attachments/assets/d42ca1f2-8e38-4b6f-bb94-aa5bd5cb0dd3" />
 
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
 ```text
-
+- ไม่สามารถส่งข้อมูลข้าม Route ได้โดยตรง การส่งข้อมูลผ่าน Constructor แบบ Prop Drilling ทำได้เฉพาะกับ Widget
+ที่เป็นโครงสร้างพ่อ-แม่-ลูก (Parent-Child) ใน Widget Tree เดียวกันเท่านั้น เมื่อ push ไปยัง Route ใหม่ โครงสร้าง Tree จะถูกแยกออกจากกัน
+- ข้อมูลไม่อัปเดตตรงกัน (State Sync Failure) หน้า FavoritesPage จะไม่มีทางรับรู้ความเปลี่ยนแปลงหรือซิงก์ข้อมูลกับ HomePage ได้
+หากไม่มีการผ่าน Callback Function ย้อนกลับไปมาหรือใช้ Global State Management ทำให้โค้ดซับซ้อน รักษายาก และเสี่ยงต่อ bugs สูง
 ```
 
 ---
@@ -500,9 +504,9 @@ class HomePage extends StatelessWidget {
 
 > ✅ **Checkpoint 2.2** ทดสอบว่าเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกันทันที ลองกดปุ่มถังขยะลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง ถ่ายภาพหน้าจอทั้งสองหน้าเทียบกันแนบส่ง
 
-```image
+<img width="1300" height="990" alt="สกรีนช็อต 2026-08-14 145837" src="https://github.com/user-attachments/assets/a4b9addf-be44-4409-9cc0-93e7085ffa9e" />
+<img width="1300" height="990" alt="สกรีนช็อต 2026-08-14 145852" src="https://github.com/user-attachments/assets/db81512b-eda9-49a0-94dd-819360ab14f4" />
 
-```
 
 ---
 
@@ -525,7 +529,17 @@ class HomePage extends StatelessWidget {
 บันทึกคำตอบที่ได้จาก Gemini 
 
 ```text
+Dark Mode / Light Mode: ควรใช้ Provider หรือ Riverpod
+- เหตุผล: เป็น App State ระดับ Global ที่ส่งผลกระทบต่อ UI ทุกหน้าจอในแอป การใช้ Provider/Riverpod
+จะช่วยจัดการธีมได้อย่างเป็นศูนย์กลางและเปลี่ยนธีมทั่วทั้งแอปได้ทันที
 
+ตัวนับ "มีคนถูกใจแล้วกี่คน": ควรใช้ Provider หรือ Riverpod
+- เหตุผล: เป็น App State ที่ต้องซิงค์ข้อมูลข้ามหน้าจอระหว่างหน้ารายการประกาศกับหน้ารายละเอียดสินค้า หากใช้ setState
+จะเกิดปัญหา Prop Drilling และจัดการ state ข้าม route ได้ยาก
+
+Animation กระพริบของไอคอนหัวใจ: ควรใช้ setState
+- เหตุผล: เป็น Ephemeral State ที่เกิดขึ้นเฉพาะภายใน Widget เดียว ไม่มีการแชร์ข้อมูลไปหน้าอื่น และหายไปเมื่อจบ animation
+การใช้ setState หรือ AnimationController ภายใน StatefulWidget จึงเพียงพอและไม่เพิ่มความซับซ้อนโดยไม่จำเป็น
 ```
 
 
@@ -536,12 +550,26 @@ class HomePage extends StatelessWidget {
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
 ```text
+จุดที่ตรงกัน ตรงกันอย่างแม่นยำตามหลักการเปรียบเทียบระหว่าง Ephemeral State กับ App State
+- คำแนะนำเลือกใช้ setState กับ Animation กระพริบ ตรงตามกรอบที่ระบุว่า ข้อมูลขอบเขตสั้น
+เกิดขึ้นเฉพาะภายใน Widget เดียว ให้เริ่มจาก setState
+- คำแนะนำเลือกใช้ Provider / Riverpod กับ Dark Mode และ ตัวนับถูกใจ ตรงตามกรอบที่ระบุว่า
+ข้อมูลที่ต้องซิงค์ข้ามหลายหน้าจอ/คนละ Route ต้องยกระดับไปใช้ App State Management
 
+จุดที่แตกต่าง
+- Gemini มักจะเสนอ Provider และ Riverpod ควบคู่กันเสมอในฐานะทางเลือกระดับ App State
+แต่กรอบการตัดสินใจในบทเรียนมีการจัดลำดับขั้นชัดเจนกว่า (ให้เริ่มจาก setState -> ย้ายไป Provider
+เมื่อต้องแชร์ข้ามหน้า -> ย้ายไป Riverpod เมื่อต้องการ Type Safety สูงขึ้นหรือทำ Unit Test เข้มงวด)
 ```
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
 ```text
-
-
+คำตอบเพิ่มเติมจาก Gemini
+- Animation กระพริบ (Widget-scoped & Short lifecycle): มีขอบเขตอยู่เฉพาะในหัวใจไอคอนดวงนั้นเพียงจุดเดียว
+เมื่อผู้ใช้ย้ายหน้าหรือ Widget นั้นถูก dispose ไป State ของ animation ก็หมดหน้าที่ลง ไม่จำเป็นต้องคงไว้ในระดับ App State
+การนำ Provider มาใช้นอกจากจะสิ้นเปลือง memory แล้ว ยังทำให้เกิดการ rebuild โดยไม่จำเป็นในส่วนอื่น
+- ตัวนับถูกใจ (Cross-scoped & Persistent lifecycle): มีขอบเขตครอบคลุมหลาย Widget/Route
+และต้องมีอายุคงอยู่ตราบเท่าที่ผู้ใช้ยังใช้งานแอป การอัปเดตจากหน้าหนึ่งต้องสะท้อนไปยังอีกหน้าหนึ่งทันที การใช้ Provider/Riverpod
+จึงเข้ามาแก้ปัญหาเรื่อง Tree Boundaries และช่วยให้สตรีมข้อมูลซิงค์กันได้สมบูรณ์
 ```
 
 ⚠️ **ข้อควรระวัง**: AI เป็นเครื่องมือช่วยคิด ไม่ใช่คำตอบสุดท้าย ผู้เรียนต้องอธิบายเหตุผลของการเลือกใช้เครื่องมือได้ด้วยตัวเองเสมอ ตามหลักการใช้ AI ในการพัฒนาซอฟต์แวร์ของวิชานี้
@@ -695,6 +723,17 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
 
+<img width="1297" height="987" alt="image" src="https://github.com/user-attachments/assets/99ba5775-5760-4a63-a272-d2df844a149a" />
+
+| สิ่งที่ใช้ใน Provider | สิ่งที่เปลี่ยนมาใช้ใน Riverpod | คำอธิบาย / หน้าที่ |
+|---|---|---|
+| `ChangeNotifier / ValueNotifier` | `Notifier / StateNotifier` | Class สำหรับเก็บข้อมูลและจัดการ Logic ของ State |
+| `StatelessWidget` | `ConsumerWidget` | Widget แบบไม่มี State ภายใน แต่อนุญาตให้ดึงข้อมูลจาก Provider ผ่าน `WidgetRef` |
+|  `StatefulWidget` | `ConsumerStatefulWidget` | Widget แบบมี State ภายใน พร้อมความสามารถในการดึงข้อมูลจาก Provide |
+| `context.watch<T>()` | `ref.watch(provider)` | ใช้ดึงข้อมูลและคอยติดตาม (Subscribe) เมื่อข้อมูลเปลี่ยนจะ Rebuild Widget |
+| `context.read<T>()` | `ref.read(provider)` | ใช้อ่านข้อมูลหรือเรียกใช้ Method เพียงครั้งเดียว (เหมาะกับ Event เช่น ปุ่ม `onPressed`) |
+| `ChangeNotifierProvider` | `NotifierProvider / StateNotifierProvider` | ตัวประกาศ Global Provider สำหรับกระจาย Instance ไปใช้งาน |
+
 ---
 
 ## ส่วนที่ 5 (ทำด้วยตนเอง): ออกแบบฟีเจอร์เพิ่มด้วยตัวเอง
@@ -705,11 +744,19 @@ class HomePage extends ConsumerWidget {
 
 เพิ่ม `TextField` ที่หน้า Home สำหรับพิมพ์คำค้นหา แล้วกรองรายการที่ส่งให้ `ItemListSection` ให้เหลือเฉพาะสินค้าที่ `title` มีคำค้นหาอยู่ (ไม่สนตัวพิมพ์เล็ก-ใหญ่)
 
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/250982a2-8c1d-4f46-a2aa-523065622637" />
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/30ae0554-bb9b-40e8-8678-5817271f1086" />
+
+
+
 **ข้อกำหนด**
 
 - ต้องตัดสินใจเองว่าค่าคำค้นหาควรเป็น Ephemeral State หรือ App State พร้อมให้เหตุผลสั้น ๆ ไว้ในช่องด้านล่าง
   ```text
-
+  Ephemeral State เหตุผล คำค้นหา (Search Query) เป็นข้อมูลชั่วคราวที่ใช้เฉพาะภายในหน้า Home เพียงหน้าเดียว
+  เพื่อกรองรายการสินค้าที่แสดงผลบน UI ในหน้านั้น ไม่มีความจำเป็นต้องแชร์ข้อมูลคำค้นหานี้ไปยัง Route หรือ Widget อื่นๆ ในแอป
+  การเลือกใช้ Ephemeral State ด้วย setState หรือ SearchController / TextEditingController จึงเพียงพอและเบาที่สุด
+  โดยไม่ต้องใช้ Provider มาเพิ่มความซับซ้อน
   ```
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
 
@@ -717,11 +764,17 @@ class HomePage extends ConsumerWidget {
 
 สังเกตว่า `FavoritesModel` มีเมธอด `clear()` เตรียมไว้ให้แล้วตั้งแต่ขั้นตอนที่ 2.2 แต่ยังไม่เคยถูกเรียกใช้งานจากที่ใดเลย ให้เพิ่มปุ่มในหน้า `FavoritesPage` ที่เรียกใช้เมธอดนี้ พร้อมแสดง Dialog ยืนยันก่อนล้างข้อมูลจริง (ใช้ `showDialog` + `AlertDialog`)
 
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/54c2af2e-5f22-4da8-804b-cfd7013689cc" />
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/8194eb56-7e27-4261-a381-dcc886fcbacc" />
+
+
 **ข้อกำหนด**
 
 - ต้องใช้ `context.read` หรือ `context.watch` ให้ถูกต้องตามหลักการ และอธิบายเหตุผลการเลือก ในช่องด้านล่าง
   ```text
-
+  ใช้ context.read<FavoritesModel>().clear() เหตุผล เป็นการเรียกใช้ Method clear() เพื่อทำ Event
+  ตอบสนองจากการกดปุ่มยืนยันใน AlertDialog เพียงครั้งเดียว ไม่ต้องการการ Rebuild Widget ตัวมันเอง ณ จุดที่กด
+  จึงต้องใช้ context.read เพื่อหลีกเลี่ยงการ subscribe โดยไม่จำเป็น
 
   ```
 - ปุ่มต้องแสดงเฉพาะเมื่อมีรายการโปรดอย่างน้อย 1 รายการเท่านั้น (ถ้ารายการว่างอยู่แล้วไม่ต้องแสดงปุ่มนี้)
