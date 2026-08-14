@@ -243,8 +243,15 @@ class MyApp extends StatelessWidget {
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
 ```text
-
+ส่งข้อมูลข้ามหน้ายากเพราะต้องฝากค่า savedItems และฟังก์ชันผ่าน Navigator.push ข้าม Route ไปมา ทำให้โค้ดเยอะ
+ข้อมูลไม่ซิงค์กัน ถ้าเพิ่ม/ลบรายการในหน้า FavoritesPage หน้า HomePage จะไม่อัปเดตตามทันที
+จัดการ Callback ซับซ้อน เพราะต้องคอยเขียนโค้ดส่งค่ากลับ (Navigator.pop) เพื่ออัปเดตหน้าเดิม เสี่ยงเกิดบั๊กสูง
 ```
+<img width="1918" height="537" alt="image" src="https://github.com/user-attachments/assets/8cea217c-b7df-44cd-b597-adcc1cc7e57b" />
+item_list_section.dart
+<img width="1092" height="788" alt="image" src="https://github.com/user-attachments/assets/e7c7fe9e-03f2-4731-9122-6a418eb039cd" />
+item_card.daart
+<img width="1102" height="782" alt="image" src="https://github.com/user-attachments/assets/0da5bedf-5d60-46b9-8cbf-e656562a1732" />
 
 ---
 
@@ -502,7 +509,12 @@ class HomePage extends StatelessWidget {
 
 ```image
 
+
 ```
+<img width="1918" height="478" alt="image" src="https://github.com/user-attachments/assets/4593eaf6-d325-4ae6-b508-f33bb1ff45b6" />
+<img width="1918" height="443" alt="image" src="https://github.com/user-attachments/assets/004bddb5-8244-4a8b-b6f3-97b21c57693a" />
+<img width="1918" height="372" alt="image" src="https://github.com/user-attachments/assets/ae6b9a31-ea83-42de-91d6-46d30f356434" />
+<img width="1917" height="467" alt="image" src="https://github.com/user-attachments/assets/9a79cdc3-88b7-48d1-a9cb-57078584aa7d" />
 
 ---
 
@@ -525,6 +537,40 @@ class HomePage extends StatelessWidget {
 บันทึกคำตอบที่ได้จาก Gemini 
 
 ```text
+การวิเคราะห์การเลือกใช้ State Management สำหรับแต่ละฟีเจอร์ มีดังนี้ครับ:
+
+1. Dark Mode / Light Mode (ส่งผลทุกหน้าจอ)
+
+  - เครื่องมือที่แนะนำ: Riverpod (หรือ Provider)
+  - เหตุผล: เป็น Global State (App-wide) ที่ต้องเปลี่ยน ThemeMode
+    ในระดับรากของแอป (MaterialApp) และมีผลต่อทุกหน้าจอ การใช้ Riverpod/Provider
+    ช่วยให้สามารถเปลี่ยนธีมและบันทึกค่าลง Storage ได้จากทุกที่โดยไม่ต้องส่ง
+    State ต่อกันเป็นทอด ๆ (Prop Drilling) ซึ่ง setState ไม่สามารถทำข้าม
+    Route/หน้าจอได้
+
+2. ซิงค์ตัวนับ "คนถูกใจ" ระหว่างหน้ารายการและหน้ารายละเอียด
+
+  - เครื่องมือที่แนะนำ: Riverpod (หรือ Provider)
+  - เหตุผล: เป็น Shared State (Cross-screen)
+    เพราะข้อมูลสินค้าชิ้นเดียวกันถูกแสดงอยู่ 2 หน้าจอที่แยกกันใน Navigation
+    Stack การใช้ Riverpod (โดยเฉพาะ NotifierProvider.family ตาม Product ID)
+    จะทำให้ทั้งสองหน้าแชร์ Data Model และอัปเดตตามกันแบบเรียลไทม์ทันทีที่มีการกด
+    Like โดยไม่ต้องเขียน Callback ส่งข้ามหน้า
+
+3. Animation กระพริบของไอคอนหัวใจ (เฉพาะใน Widget เดียว)
+
+  - เครื่องมือที่แนะนำ: setState
+  - เหตุผล: เป็น Ephemeral State (Local State) ที่มีผลเฉพาะ UI
+    ของปุ่มนั้นชั่วคราว ไม่ได้ส่งผลต่อ Data Logic หรือหน้าจออื่น การใช้ setState
+    ร่วมกับ AnimationController ใน StatefulWidget (หรือใช้ Implicit Animation)
+    เป็นวิธีที่เรียบง่าย ประสิทธิภาพสูง และไม่ทำให้โค้ดซับซ้อนเกินความจำเป็น
+    (ไม่ควรใช้ Riverpod/Provider กับ Animation เล็ก ๆ ใน Widget เดียว)
+
+💡 สรุปหลักการจำง่าย ๆ
+
+  - Widget ตัวเองรู้คนเดียว (UI/Animation): ใช้ setState
+  - ข้อมูลแชร์ข้ามหน้า / ทั้งแอป (Business Logic/Theme/Data): ใช้ Riverpod หรือ
+    Provider
 
 ```
 
@@ -536,13 +582,22 @@ class HomePage extends StatelessWidget {
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
 ```text
-
+คำตอบของ AI แนะนำตรงกับกรอบการตัดสินใจในบทเรียนอย่างสมบูรณ์แบบ โดยใช้เกณฑ์การแบ่งประเภท State ตามขอบเขตการใช้งาน
+1. Dark/Light Mode: แนะนำให้ใช้ Provider/Riverpod ตรงกับบทเรียนที่เป็นแบบ App-wide State เพื่อให้เปลี่ยนธีมได้ทั่วทั้งแอปโดยไม่ต้องทำ Prop Drilling
+2. ซิงค์ตัวนับคนถูกใจข้ามหน้า: แนะนำให้ใช้ Provider/Riverpod ตรงกับบทเรียนที่เป็น Cross-screen State เพื่อให้ข้อมูลสินค้าซิงค์กันระหว่างหน้าจอที่แยก Route กัน
+3. Animation หัวใจกระพริบ: แนะนำให้ใช้ setState ตรงกับบทเรียนที่เป็น Ephemeral / Local State สำหรับควบคุม UI เฉพาะจุดแบบชั่วคราว ไม่ซับซ้อน และไม่ควรโอเวอร์เอนจิเนียร์
 ```
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
 ```text
-
-
+1. ถามเรื่องขอบเขตประสิทธิภาพ - Performance & Scope
+- ทำไมเราถึงไม่ควรใช้ Riverpod หรือ Provider ในการจัดการ State ของ Animation กระพริบหัวใจ (ข้อ 3) ทั้งๆ ที่มันก็สามารถทำได้เหมือนกัน? การใช้ setState ในจุดนี้มีผลต่อประสิทธิภาพ (Performance) อย่างไร
+2. ถามเรื่องขอบเขตของ Widget - Widget Boundary
+- หากในอนาคต ฟีเจอร์ซิงค์คนถูกใจ (ข้อ 2) มีการเพิ่มปุ่มกด Like ในหน้าโปรไฟล์ผู้ใช้เพิ่มมาอีกหน้าหนึ่ง โครงสร้าง State Management แบบ Riverpod ที่วางไว้เดิมจะต้องปรับเปลี่ยนขอบเขต (Scope) อย่างไรหรือไม่
 ```
+<img width="862" height="683" alt="image" src="https://github.com/user-attachments/assets/153ed1ba-6a07-4581-9be7-106498c11e53" />
+<img width="887" height="675" alt="image" src="https://github.com/user-attachments/assets/d9a39444-7c68-4886-bc09-9517b9a06e8e" />
+<img width="842" height="492" alt="image" src="https://github.com/user-attachments/assets/2b176fd8-8ec3-40b6-9e39-96fc7c7cfb49" />
+
 
 ⚠️ **ข้อควรระวัง**: AI เป็นเครื่องมือช่วยคิด ไม่ใช่คำตอบสุดท้าย ผู้เรียนต้องอธิบายเหตุผลของการเลือกใช้เครื่องมือได้ด้วยตัวเองเสมอ ตามหลักการใช้ AI ในการพัฒนาซอฟต์แวร์ของวิชานี้
 
@@ -694,7 +749,22 @@ class HomePage extends ConsumerWidget {
 > ✅ **Checkpoint 4.1** รันแอปด้วย `flutter run` (หรือกด F5 ใน VS Code) แล้วทดสอบกดปุ่ม "บันทึก" ที่สินค้าชิ้นใดก็ได้ ตรวจว่าตัวเลข ❤️ ที่ AppBar เพิ่มขึ้นถูกต้อง ถ่ายภาพหน้าจอแนบส่ง
 
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
-
+<img width="1912" height="425" alt="image" src="https://github.com/user-attachments/assets/83b4f6d6-2348-48c1-89fe-90fc0cb69b43" />
+1. การจัดการ State Class:
+Provider: ChangeNotifier
+Riverpod: StateNotifier<T> (หรือ Notifier<T>)
+2. ชนิดของ Widget ที่ใช้รองรับ:
+Provider: StatelessWidget / StatefulWidget
+Riverpod: ConsumerWidget / ConsumerStatefulWidget
+3. การดึงค่าและติดตามการเปลี่ยนแปลง (Rebuild UI):
+Provider: context.watch<T>()
+Riverpod: ref.watch(provider)
+4. การเรียกใช้ฟังก์ชัน / Action (ไม่ Rebuild):
+Provider: context.read<T>()
+Riverpod: ref.read(provider.notifier)
+5. การประกาศครอบระดับแอป (Root Widget):
+Provider: ChangeNotifierProvider
+Riverpod: ProviderScope
 ---
 
 ## ส่วนที่ 5 (ทำด้วยตนเอง): ออกแบบฟีเจอร์เพิ่มด้วยตัวเอง
@@ -709,7 +779,8 @@ class HomePage extends ConsumerWidget {
 
 - ต้องตัดสินใจเองว่าค่าคำค้นหาควรเป็น Ephemeral State หรือ App State พร้อมให้เหตุผลสั้น ๆ ไว้ในช่องด้านล่าง
   ```text
-
+- ประเภท State: Ephemeral State (Local State)
+- เหตุผล: คำค้นหาถูกใช้กรองข้อมูลชั่วคราวเฉพาะในหน้า Home หน้าเดียว ไม่ได้แชร์ไปหน้าอื่น และไม่ต้องบันทึกเก็บไว้เมื่อออกจากหน้า การใช้ setState ธรรมดาจึงเบา เรียบง่าย และเพียงพอที่สุดโดยไม่ต้องใช้ Provider
   ```
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
 
@@ -721,11 +792,12 @@ class HomePage extends ConsumerWidget {
 
 - ต้องใช้ `context.read` หรือ `context.watch` ให้ถูกต้องตามหลักการ และอธิบายเหตุผลการเลือก ในช่องด้านล่าง
   ```text
-
+  - การเลือกใช้ context.watch: ใช้ตรงเงื่อนไขเช็คจำนวนรายการโปรดเพื่อแสดง/ซ่อนปุ่มล้างข้อมูล เพราะต้องคอยฟัง (Listen) การเปลี่ยนแปลงของข้อมูล เพื่อ Rebuild ซ่อนปุ่มทันทีเมื่อรายการว่างเปล่า
+- การเลือกใช้ context.read: ใช้ในปุ่มกดเรียกเมธอด clear() สำหรับสั่ง Action ล้างข้อมูลใน Dialog เพราะเป็นการทำ Event Handling ที่ไม่ต้องการคอยติดตามข้อมูลเพื่อ Rebuild UI ในจุดนั้น
 
   ```
 - ปุ่มต้องแสดงเฉพาะเมื่อมีรายการโปรดอย่างน้อย 1 รายการเท่านั้น (ถ้ารายการว่างอยู่แล้วไม่ต้องแสดงปุ่มนี้)
-
+ ```
 ### โจทย์ที่ 3 (ท้าทายเพิ่ม ไม่บังคับ)
 
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) 
@@ -735,3 +807,5 @@ class HomePage extends ConsumerWidget {
 
 
 ```
+<img width="1918" height="557" alt="image" src="https://github.com/user-attachments/assets/fc8039a8-63b2-47f9-8de8-4f1c4a0740de" />
+<img width="1918" height="780" alt="image" src="https://github.com/user-attachments/assets/5740e2e8-11e0-44f8-b5bd-b1fce576da31" />
