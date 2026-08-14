@@ -538,6 +538,7 @@ class HomePage extends StatelessWidget {
 บันทึกคำตอบที่ได้จาก Gemini 
 
 ```text
+ในโปรเจกต์ Campus Marketplace มีการเลือกใช้เครื่องมือจัดการ State ให้เหมาะกับขอบเขตผลกระทบของแต่ละฟีเจอร์ โดย Dark/Light Mode ซึ่งเป็น Global State ที่กระทบทั้งแอป แนะนำให้ใช้ Provider หรือ Riverpod เพื่อหลีกเลี่ยง Prop Drilling และจัดการ rebuild ได้ทั่วทั้งแอป ส่วน ตัวนับ Like ที่ต้องซิงค์ระหว่างหน้าจอ เป็น Shared State จึงเหมาะกับ Riverpod โดยเฉพาะการใช้ .family เพื่อแยก state ตาม productId ได้อย่างเป็นระเบียบ ในขณะที่ Animation ไอคอนหัวใจ เป็นเพียง Local UI State ภายใน widget เดียว จึงใช้แค่ setState ก็เพียงพอและมีประสิทธิภาพที่สุด
 
 ```
 
@@ -706,6 +707,9 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.1** รันแอปด้วย `flutter run` (หรือกด F5 ใน VS Code) แล้วทดสอบกดปุ่ม "บันทึก" ที่สินค้าชิ้นใดก็ได้ ตรวจว่าตัวเลข ❤️ ที่ AppBar เพิ่มขึ้นถูกต้อง ถ่ายภาพหน้าจอแนบส่ง
 
+<img width="1285" height="867" alt="image" src="https://github.com/user-attachments/assets/cc9175e2-1481-4e9a-a6d7-743afbdc108f" />
+
+
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
 
 ---
@@ -737,7 +741,9 @@ class HomePage extends ConsumerWidget {
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) เพื่อฝึกโยกความสามารถเดียวกันข้ามเครื่องมือ State Management สองแบบ
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์
-```text
+
+<img width="1295" height="877" alt="image" src="https://github.com/user-attachments/assets/68119fe4-8cca-4bde-87eb-e12ec7d5b90e" />
+
 
 
 ```
