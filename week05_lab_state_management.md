@@ -721,7 +721,20 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.1** รันแอปด้วย `flutter run` (หรือกด F5 ใน VS Code) แล้วทดสอบกดปุ่ม "บันทึก" ที่สินค้าชิ้นใดก็ได้ ตรวจว่าตัวเลข ❤️ ที่ AppBar เพิ่มขึ้นถูกต้อง ถ่ายภาพหน้าจอแนบส่ง
 
+![Checkpoint 4.1 Riverpod Trial (AppBar แสดง ❤️ 1)](images/checkpoint4_riverpod_saved.png)
+
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
+
+### ตารางเปรียบเทียบการแปลงโค้ดจาก Provider เป็น Riverpod
+
+| หัวข้อ | Provider | Riverpod |
+|---|---|---|
+| **คลาสสร้าง State Model** | `ChangeNotifier` | `StateNotifier<T>` |
+| **การเปลี่ยนค่า State** | แก้ไขข้อมูลโดยตรงและเรียก `notifyListeners()` | แทนที่ด้วย State ก้อนใหม่ `state = [...state, item]` |
+| **การลงทะเบียน Provider** | `ChangeNotifierProvider` ภายใน Widget Tree | `StateNotifierProvider` ประกาศเป็น Global Variable |
+| **คลาสของ Widget** | `StatelessWidget` | `ConsumerWidget` |
+| **การดึง State มาแสดงผล** | `context.watch<FavoritesModel>()` | `ref.watch(favoritesProvider)` |
+| **การเรียกใช้งาน Method** | `context.read<FavoritesModel>().add()` | `ref.read(favoritesProvider.notifier).add()` |
 
 ---
 
