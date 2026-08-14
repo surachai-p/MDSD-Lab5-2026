@@ -729,6 +729,8 @@ class HomePage extends ConsumerWidget {
 ### โจทย์ที่ 2: ปุ่ม "ล้างรายการโปรดทั้งหมด"
 
 สังเกตว่า `FavoritesModel` มีเมธอด `clear()` เตรียมไว้ให้แล้วตั้งแต่ขั้นตอนที่ 2.2 แต่ยังไม่เคยถูกเรียกใช้งานจากที่ใดเลย ให้เพิ่มปุ่มในหน้า `FavoritesPage` ที่เรียกใช้เมธอดนี้ พร้อมแสดง Dialog ยืนยันก่อนล้างข้อมูลจริง (ใช้ `showDialog` + `AlertDialog`)
+<img width="1893" height="1025" alt="image" src="https://github.com/user-attachments/assets/e1da6867-921f-4d6b-9923-84d81712ae2f" />
+![Uploading image.png…]()
 
 **ข้อกำหนด**
 
