@@ -5,12 +5,23 @@ import 'models/favorites_model.dart';
 import 'widgets/item_list_section.dart';
 import 'favorites_page.dart';
 
-class HomePage extends StatelessWidget {
-  // เปลี่ยนจาก StatefulWidget เป็น StatelessWidget ได้เลย เพราะไม่ต้องเก็บ State ใด ๆ ไว้เองอีกแล้ว
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String _searchQuery = ''; // Ephemeral State สำหรับเก็บคำค้นหาภายใน HomePage เท่านั้น
+
+  @override
   Widget build(BuildContext context) {
+    // กรอง catalog ตามคำค้นหา (case-insensitive)
+    final filteredCatalog = catalog
+        .where((i) => i.title.toLowerCase().contains(_searchQuery.toLowerCase()))
+        .toList();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Campus Marketplace'),
@@ -20,7 +31,6 @@ class HomePage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.favorite),
-                // .watch ทำให้ตัวเลขนี้อัปเดตเองทุกครั้งที่ FavoritesModel เปลี่ยน ไม่ว่าจะเปลี่ยนจากจุดไหน
                 Text(' ${context.watch<FavoritesModel>().itemCount}'),
               ],
             ),
@@ -31,7 +41,33 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
-      body: ItemListSection(catalog: catalog),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'ค้นหาสินค้า...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value; // ใช้ setState จัดการ Ephemeral State
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: ItemListSection(catalog: filteredCatalog),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

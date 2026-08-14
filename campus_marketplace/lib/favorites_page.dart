@@ -7,11 +7,44 @@ class FavoritesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // .watch เพราะหน้านี้ต้อง rebuild ทุกครั้งที่รายการโปรดเปลี่ยน (เช่น กดลบจากหน้านี้เอง)
+    // .watch เพื่อให้หน้านี้ rebuild ทุกครั้งที่รายการโปรดเปลี่ยน
     final favorites = context.watch<FavoritesModel>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('รายการโปรดของฉัน')),
+      appBar: AppBar(
+        title: const Text('รายการโปรดของฉัน'),
+        actions: [
+          // แสดงปุ่มล้างรายการเฉพาะเมื่อมีสินค้าในรายการโปรดอย่างน้อย 1 รายการ
+          if (favorites.items.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.delete_sweep),
+              tooltip: 'ล้างรายการโปรดทั้งหมด',
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('ยืนยันการล้างรายการโปรด'),
+                    content: const Text('คุณต้องการล้างรายการโปรดทั้งหมดหรือไม่?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('ยกเลิก'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          // .read ใน onPressed เพื่อสั่งงานโดยไม่สมัครรับการฟังใน handler
+                          context.read<FavoritesModel>().clear();
+                          Navigator.pop(ctx);
+                        },
+                        child: const Text('ตกลง', style: TextStyle(color: Colors.red)),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+        ],
+      ),
       body: favorites.items.isEmpty
           ? const Center(child: Text('ยังไม่มีสินค้าที่บันทึกไว้'))
           : ListView.builder(
@@ -23,7 +56,6 @@ class FavoritesPage extends StatelessWidget {
                   subtitle: Text('฿${item.price.toStringAsFixed(0)}'),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete_outline),
-                    // .read เพราะเป็นการกดปุ่มครั้งเดียว ไม่ใช่การอ่านค่าต่อเนื่องแบบ .watch
                     onPressed: () => context.read<FavoritesModel>().remove(item),
                   ),
                 );

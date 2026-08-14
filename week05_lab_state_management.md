@@ -766,7 +766,20 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์
 
+### 1. ภาพหน้าจอฟีเจอร์ค้นหาสินค้า (Search Box)
+
+![Checkpoint 5.1 ฟีเจอร์ค้นหาสินค้า](images/checkpoint5_search_filtered.png)
+
+### 2. ภาพ Dialog ยืนยันการล้างรายการโปรดทั้งหมด
+
+![Checkpoint 5.1 Dialog ยืนยันการล้างรายการโปรด](images/checkpoint5_clear_dialog.png)
+
+### 3. เหตุผลการเลือกชนิด State
+
 ```text
+โจทย์ที่ 1 ช่องค้นหาสินค้า
+เลือกใช้ Ephemeral State ด้วย setState เพราะคำค้นหาถูกใช้กรองรายการเฉพาะใน HomePage หน้าเดียว ไม่มี Route หรือ Widget อื่นต้องใช้ร่วม จึงใช้ setState ที่น้ำหนักเบาและตรงวัตถุประสงค์ที่สุด
 
-
+โจทย์ที่ 2 ปุ่มล้างรายการโปรดทั้งหมด
+เลือกใช้ App State ด้วย Provider เพราะต้องจัดการข้อมูลรายการโปรดส่วนกลาง โดยใช้ context.watch<FavoritesModel>() สำหรับตรวจสอบ favorites.items.isNotEmpty ในการซ่อนหรือแสดงปุ่ม และใช้ context.read<FavoritesModel>().clear() ใน onPressed เพื่อสั่งงานโดยไม่เกิดการสมัครฟังซ้ำซ้อน
 ```
