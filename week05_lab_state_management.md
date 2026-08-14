@@ -837,7 +837,9 @@ class HomePage extends ConsumerWidget {
 **ข้อกำหนด**
 
 - ต้องตัดสินใจเองว่าค่าคำค้นหาควรเป็น Ephemeral State หรือ App State พร้อมให้เหตุผลสั้น ๆ ไว้ในช่องด้านล่าง
-  ```text
+  ```
+  ควรเป็น Ephemeral State
+  เพราะค่าที่ผู้ใช้พิมพ์ค้นหานั้น ถูกนำมาใช้เพื่อกรอง UI เฉพาะในหน้า HomePage เท่านั้น ไม่ได้มีความจำเป็นต้องส่งค่านี้ไปให้หน้าจออื่นหรือ Widget อื่นรับรู้ การใช้เพียง setState ภายใน Widget จึงเหมาะสมและเพียงพอแล้ว
 
   ```
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
@@ -849,9 +851,9 @@ class HomePage extends ConsumerWidget {
 **ข้อกำหนด**
 
 - ต้องใช้ `context.read` หรือ `context.watch` ให้ถูกต้องตามหลักการ และอธิบายเหตุผลการเลือก ในช่องด้านล่าง
-  ```text
-
-
+  ```
+  การเรียกคำสั่ง clear() ต้องใช้ context.read
+  เพราะการทำงานนี้เกิดขึ้นเมื่อผู้ใช้กดปุ่ม (Event) ซึ่งเป็นการสั่งงานแบบครั้งเดียว (One-time action) เพื่อไปลบข้อมูล ตัวปุ่มเองไม่ได้ต้องการสมัครเป็นผู้ติดตาม (Subscribe) เพื่อให้ตัวเอง Rebuild เมื่อข้อมูลเปลี่ยนแปลง จึงต้องใช้ read ไม่ใช่ watch
   ```
 - ปุ่มต้องแสดงเฉพาะเมื่อมีรายการโปรดอย่างน้อย 1 รายการเท่านั้น (ถ้ารายการว่างอยู่แล้วไม่ต้องแสดงปุ่มนี้)
 
@@ -860,7 +862,19 @@ class HomePage extends ConsumerWidget {
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) 
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์ ในช่องด้านล่าง
-```text
-
-
 ```
+โจทย์ที่ 1 ช่องค้นหาสินค้า
+- เลือกใช้ Ephemeral State
+เพราะค่าที่ผู้ใช้พิมพ์ค้นหานั้น ถูกนำมาใช้เพื่อกรอง UI เฉพาะในหน้า HomePage เท่านั้น ไม่ได้มีความจำเป็นต้องส่งค่านี้ไปให้หน้าจออื่นหรือ Widget อื่นรับรู้ การใช้เพียง setState ภายใน Widget จึงเหมาะสมและเพียงพอแล้ว
+
+โจทย์ที่ 2: ปุ่ม "ล้างรายการโปรดทั้งหมด"
+- เลือกใช้ App State
+การทำงานของปุ่ม "ตกลง" ใน Dialog นั้น เป็นการยิงคำสั่งแบบครั้งเดียว (One-time Event) ผ่าน `onPressed` เราจึงต้องใช้ `context.read<FavoritesModel>()` (หรือ `ref.read` ในกรณีของ Riverpod) เพื่อส่งคำสั่งไปแก้ไขข้อมูลส่วนกลาง โดยไม่ใช้ `.watch()` เพราะตัวปุ่มใน Dialog ไม่ได้มีความจำเป็นต้องสมัครเป็นผู้ติดตาม (Subscribe) เพื่อให้ตัวเอง Rebuild เมื่อจำนวนรายการโปรดเปลี่ยนแปลง
+```
+
+<img width="747" height="995" alt="image" src="https://github.com/user-attachments/assets/f4da093e-5d8f-44c4-9040-259fcfe47de4" />
+<img width="744" height="995" alt="image" src="https://github.com/user-attachments/assets/cef28d82-a1f1-4f38-bc9b-7090c8a9b943" />
+<img width="758" height="1001" alt="image" src="https://github.com/user-attachments/assets/08603b07-cb01-44f4-a7fe-13ef592ee2f1" />
+<img width="748" height="1011" alt="image" src="https://github.com/user-attachments/assets/2252d6ef-0e07-417c-a8bb-7f04b250af05" />
+<img width="753" height="999" alt="image" src="https://github.com/user-attachments/assets/70f9e8e6-3a97-4f37-88d5-28a4bcc48694" />
+<img width="750" height="1001" alt="image" src="https://github.com/user-attachments/assets/c037a151-9a26-4d22-a3d7-f51831e12425" />
