@@ -790,3 +790,15 @@ class HomePage extends ConsumerWidget {
 
 
 ```
+
+### โจทย์ที่ 1
+<img width="1919" height="1011" alt="image" src="https://github.com/user-attachments/assets/bcf8bf2b-0490-449e-8e64-a941b48f0aaa" />
+
+<img width="1919" height="1011" alt="image" src="https://github.com/user-attachments/assets/163028bb-1371-46b2-8cf5-4aea9c75400f" />
+
+<img width="1919" height="1016" alt="image" src="https://github.com/user-attachments/assets/254a5af1-1ca5-4c41-bd21-0365ae61d241" />
+
+### โจทย์ที่ 2
+<img width="1919" height="1014" alt="image" src="https://github.com/user-attachments/assets/05cd02dd-21f0-4f39-bd3d-cef5d60b11b4" />
+
+<img width="1919" height="1015" alt="image" src="https://github.com/user-attachments/assets/2c88b7fc-66c6-429a-9c24-85a5a96921e6" />
