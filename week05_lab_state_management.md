@@ -768,26 +768,37 @@ class HomePage extends ConsumerWidget {
 
 เพิ่ม `TextField` ที่หน้า Home สำหรับพิมพ์คำค้นหา แล้วกรองรายการที่ส่งให้ `ItemListSection` ให้เหลือเฉพาะสินค้าที่ `title` มีคำค้นหาอยู่ (ไม่สนตัวพิมพ์เล็ก-ใหญ่)
 
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/a8c78216-57fb-42fb-bedf-125c6266c8be" />
+
 **ข้อกำหนด**
 
 - ต้องตัดสินใจเองว่าค่าคำค้นหาควรเป็น Ephemeral State หรือ App State พร้อมให้เหตุผลสั้น ๆ ไว้ในช่องด้านล่าง
-  ```text
-
-  ```
+```text
+เป็น Ephemeral State เพราะคำค้นหามีผลแค่หน้า HomePage เท่านั้น ไม่ได้แชร์ให้หน้าอื่น จึงใช้แค่ `setState` ธรรมดาก็เพียงพอ
+```
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
 
 ### โจทย์ที่ 2: ปุ่ม "ล้างรายการโปรดทั้งหมด"
 
 สังเกตว่า `FavoritesModel` มีเมธอด `clear()` เตรียมไว้ให้แล้วตั้งแต่ขั้นตอนที่ 2.2 แต่ยังไม่เคยถูกเรียกใช้งานจากที่ใดเลย ให้เพิ่มปุ่มในหน้า `FavoritesPage` ที่เรียกใช้เมธอดนี้ พร้อมแสดง Dialog ยืนยันก่อนล้างข้อมูลจริง (ใช้ `showDialog` + `AlertDialog`)
 
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/ebe79b88-bc33-44d0-a624-270723dd0ac3" />
+
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/427e3187-d8b3-42bc-948f-221849293e24" />
+
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/03a64011-289d-41bb-9a37-6620d2c74c06" />
+
 **ข้อกำหนด**
 
 - ต้องใช้ `context.read` หรือ `context.watch` ให้ถูกต้องตามหลักการ และอธิบายเหตุผลการเลือก ในช่องด้านล่าง
-  ```text
-
-
-  ```
+```text
+ใช้ context.read เพราะคำสั่ง .clear() ถูกเรียกใช้งานแค่ครั้งเดียวตอนกดปุ่ม (onPressed) ไม่ได้เป็นการอ่านค่าเพื่อไปแสดงผลบน UI
+```
 - ปุ่มต้องแสดงเฉพาะเมื่อมีรายการโปรดอย่างน้อย 1 รายการเท่านั้น (ถ้ารายการว่างอยู่แล้วไม่ต้องแสดงปุ่มนี้)
+
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/53469615-58b2-4c8b-ae40-01e15a60a5dc" />
+
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/973d2b20-f70e-427d-9fa0-434904f02f29" />
 
 ### โจทย์ที่ 3 (ท้าทายเพิ่ม ไม่บังคับ)
 
@@ -795,6 +806,14 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์ ในช่องด้านล่าง
 ```text
-
-
+ช่องค้นหาสินค้าจัดเป็น Ephemeral State จึงใช้แค่ setState ก็พอ เพราะมีผลกรองหน้าจอแค่หน้าเดียว ไม่ต้องแชร์ข้อมูลกับใครและปุ่มล้างรายการโปรดจัดเป็น App State ต้องสั่งผ่าน ref.read ไปที่ Provider เพราะรายการโปรดเป็นข้อมูลส่วนกลางที่แชร์ใช้งานร่วมกันทั้งแอป
 ```
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/be8f3d49-e3b3-43c3-85b6-77386a02d8e5" />
+
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/e1715076-dc01-4f95-972a-83c790a599e4" />
+
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/df4a8bb0-c6dd-476a-aedd-b044c1635431" />
+
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/3c7a1cef-37f9-48b9-9c35-06a145808157" />
+
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/f85f7c75-075e-4610-a7be-a26bce6de784" />
