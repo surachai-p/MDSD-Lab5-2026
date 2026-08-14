@@ -243,6 +243,8 @@ class MyApp extends StatelessWidget {
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
 ```text
+State ไม่ Sync กัน (Data Inconsistency): เมื่อกดบันทึกหรือยกเลิกบันทึกสถานที่ในหน้า FavoritesPage ค่าในหน้าหลักจะไม่ถูกอัปเดตตามทันที (และในทางกลับกัน) เพราะ State ถูกจัดการแยกจากกันในแต่ละ Route
+เกิด Prop Drilling ซ้ำซ้อนและซับซ้อนขึ้น: ต้องคอยส่ง State และ Callback function ผ่านการส่ง Parameter ข้าม Route/Page หลายชั้น ทำให้โค้ดผูกติดกัน (Tight Coupling) และดูแลรักษายาก
 
 ```
 
