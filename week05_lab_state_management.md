@@ -497,12 +497,15 @@ class HomePage extends StatelessWidget {
 ```
 
 > ✅ **Checkpoint 2.1** รันแอปใหม่ ทดสอบกดบันทึกสินค้าจากหลายจุด แล้วตรวจว่าตัวเลขที่ AppBar อัปเดตถูกต้องทุกครั้ง โดยที่ไฟล์ `item_list_section.dart` และ `item_card.dart` **ไม่มีพารามิเตอร์ savedItems หรือ onSave หลงเหลือใน constructor แล้ว**
+<img width="1280" height="910" alt="image" src="https://github.com/user-attachments/assets/92aaf2d5-ac45-4fd1-8c8a-09b8e9f68fda" />
 
 > ✅ **Checkpoint 2.2** ทดสอบว่าเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกันทันที ลองกดปุ่มถังขยะลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง ถ่ายภาพหน้าจอทั้งสองหน้าเทียบกันแนบส่ง
+<img width="1280" height="910" alt="image" src="https://github.com/user-attachments/assets/a4ba3496-c755-4bf5-a222-c10932a9b965" />
+<img width="1296" height="883" alt="image" src="https://github.com/user-attachments/assets/1d7ed0f6-0645-4578-aaa6-dc03c66c74c7" />
+<img width="1287" height="891" alt="image" src="https://github.com/user-attachments/assets/51b9c140-b87d-4751-b426-ef6d9fa9ac21" />
+<img width="1272" height="628" alt="image" src="https://github.com/user-attachments/assets/3d27a854-bbc0-4e66-932d-b8179373634b" />
 
-```image
 
-```
 
 ---
 
@@ -524,9 +527,39 @@ class HomePage extends StatelessWidget {
 
 บันทึกคำตอบที่ได้จาก Gemini 
 
-```text
+# การวิเคราะห์การเลือกใช้ State Management สำหรับแต่ละฟีเจอร์ในแอป Flutter
 
-```
+**1. Dark Mode / Light Mode (ส่งผลต่อทุกหน้าจอในแอป)**
+* **เครื่องมือที่แนะนำ:** Provider หรือ Riverpod (Global / App-wide State)
+* **เหตุผล:**
+  * **ควบคุมระดับ Root:** สถานะ Theme เป็นข้อมูลระดับส่วนกลาง (Global State) ที่ต้องควบคุมตั้งแต่ Root Widget (`MaterialApp(themeMode: ...)`) และส่งผลกระทบต่อทุกหน้าจอในแอป
+  * **จัดการข้ามหน้าง่าย:** `setState` ไม่สามารถส่งผ่านสถานะข้ามหน้าจอได้อย่างมีประสิทธิภาพ ขณะที่ Provider/Riverpod สามารถให้ทุกหน้าเข้าถึงและสั่งเปลี่ยนธีมได้จากทุกที่ พร้อมทั้งผูกบันทึกค่าลง Local Storage (เช่น `SharedPreferences`) ได้สะดวก
+
+---
+
+**2. ตัวนับจำนวนถูกใจ (ซิงค์ระหว่างหน้ารายการประกาศกับหน้ารายละเอียดสินค้า)**
+* **เครื่องมือที่แนะนำ:** Riverpod หรือ Provider (Shared / Cross-Screen State)
+* **เหตุผล:**
+  * **อัปเดตแบบ Real-time:** เป็นข้อมูลที่ต้องแชร์และอัปเดตทันทีระหว่าง 2 หน้าจอ (เมื่อกดไลก์ในหน้ารายละเอียด หน้ารายการประกาศต้องเปลี่ยนตามทันที)
+  * **Single Source of Truth:** `setState` ทำงานได้เฉพาะภายใน Widget/หน้าของตัวเองเท่านั้น การใช้ Riverpod (เช่น `StateNotifierProvider` หรือ `.family` ตาม `productId`) หรือ Provider จะช่วยให้ทั้งสองหน้าดึงข้อมูลจากแหล่งความจริงจุดเดียวกัน
+
+---
+
+**3. Animation กระพริบ/เด้งของไอคอนหัวใจตอนกดถูกใจ (ใช้เฉพาะใน Widget เดียว)**
+* **เครื่องมือที่แนะนำ:** `setState` หรือร่วมกับ `AnimationController` ใน `StatefulWidget` (Ephemeral / Local UI State)
+* **เหตุผล:**
+  * **Scope แคบ:** เป็นสถานะชั่วคราวที่มีผลเฉพาะการแสดงผลกราฟิกของปุ่มนั้น ๆ ตัวเดียว ไม่ได้มีหน้าจอหรือเซอร์วิสอื่นต้องการใช้ข้อมูลแอนิเมชันนี้ร่วมด้วย
+  * **ไม่เพิ่ม Overhead:** การใช้ `setState` ภายใน `StatefulWidget` เรียบง่ายที่สุด ทำงานได้รวดเร็ว และไม่เพิ่มความซับซ้อน (No Boilerplate/Overhead) ให้กับโปรเจกต์
+
+---
+
+### 📌 สรุปเกณฑ์การตัดสินใจสั้น ๆ
+
+| ฟีเจอร์ | ขอบเขตของข้อมูล (Scope) | เครื่องมือที่แนะนำ |
+| :--- | :--- | :--- |
+| **Dark/Light Mode** | ทั้งแอปพลิเคชัน (Global) | Provider / Riverpod |
+| **ตัวนับ Like ข้ามหน้า** | ข้ามหลายหน้าจอ (Shared) | Riverpod / Provider |
+| **Heart Animation** | เฉพาะใน Widget ตัวเอง (Local) | `setState` |
 
 
 ### ขั้นตอนที่ 3.2: ประเมินคำตอบของ AI
