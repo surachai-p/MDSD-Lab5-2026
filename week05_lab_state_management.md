@@ -240,10 +240,14 @@ class MyApp extends StatelessWidget {
 
 > ✅ **Checkpoint 1.1** รันแอปและกดปุ่ม "🤍 บันทึกเป็นรายการโปรด" ที่สินค้าชิ้นใดก็ได้ ทดสอบว่า (ก) ตัวเลขในไอคอนหัวใจที่ AppBar เพิ่มขึ้นถูกต้อง และ (ข) ปุ่มของสินค้าที่กดไปแล้วเปลี่ยนเป็น "❤️ บันทึกแล้ว" และกดซ้ำไม่ได้ ถ่ายภาพหน้าจอที่เห็นทั้งสองอย่างนี้พร้อมกัน แล้วเปิดไฟล์ `item_card.dart` และ `item_list_section.dart` ให้เห็น constructor ที่ต้องรับพารามิเตอร์ส่งต่อ (Prop Drilling) ชัดเจน แนบส่งในรายงาน
 
+ผลการทดลอง **Checkpoint 1.1**
+ก. ตัวเลขในไอคอนหัวใจที่ AppBar เพิ่มขึ้นถูกต้อง
+ข. กดซ้ำไม่ได้
+<img width="749" height="1001" alt="image" src="https://github.com/user-attachments/assets/4f880a4b-843c-44e1-bafe-a0ede9cec7a0" />
+
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
-
-```text
-
+```
+เกิดปัญหาข้อมูลไม่ซิงค์กัน เนื่องจาก Prop Drilling เป็นการส่งข้อมูลผ่าน Constructor ซึ่งทำได้เฉพาะจากแม่ไปลูกในหน้าเดียวกันเท่านั้น ไม่สามารถส่งข้าม Route ได้
 ```
 
 ---
@@ -500,9 +504,17 @@ class HomePage extends StatelessWidget {
 
 > ✅ **Checkpoint 2.2** ทดสอบว่าเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกันทันที ลองกดปุ่มถังขยะลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง ถ่ายภาพหน้าจอทั้งสองหน้าเทียบกันแนบส่ง
 
-```image
-
 ```
+ผลคือเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกัน
+และเมื่อกดลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง 
+```
+<img width="765" height="1006" alt="image" src="https://github.com/user-attachments/assets/f61064e6-4f6d-4052-986c-402e4e0ec657" />
+<img width="754" height="996" alt="image" src="https://github.com/user-attachments/assets/027bc9fb-74e3-4785-b52d-c402eb0a6fc5" />
+<img width="749" height="1001" alt="image" src="https://github.com/user-attachments/assets/8256d20e-2688-401e-98ac-41b79b860f75" />
+<img width="748" height="996" alt="image" src="https://github.com/user-attachments/assets/e10146e8-279d-4da1-8d54-8f7dfc0c9179" />
+
+<img width="1047" height="513" alt="image" src="https://github.com/user-attachments/assets/b67de763-370d-44b0-8de4-c13ed9565cc0" />
+<img width="1011" height="822" alt="image" src="https://github.com/user-attachments/assets/6590618b-7048-4d35-a1a9-9128e5cc620e" />
 
 ---
 
@@ -523,8 +535,46 @@ class HomePage extends StatelessWidget {
 ```
 
 บันทึกคำตอบที่ได้จาก Gemini 
+```
+สำหรับการเลือกเครื่องมือจัดการ State ในแอป Flutter ของคุณ
+ผมขอสรุปการวิเคราะห์แยกตามความเหมาะสมของแต่ละฟีเจอร์ดังนี้ครับ:
 
-```text
+1. Dark Mode / Light Mode
+
+  - เครื่องมือที่แนะนำ: Riverpod (หรือ Provider)
+  - เหตุผล:
+      - Global State: ธีมเป็นค่าที่ส่งผลกระทบต่อทุก Widget ในแอป (App-wide)
+        จึงต้องเก็บไว้ในระดับบนสุดของแอป
+      - Persistence: ปกติการเปลี่ยนโหมดต้องมีการบันทึกค่าลงเครื่อง (Shared
+        Preferences) ซึ่ง Riverpod จัดการเรื่องการทำ Dependency Injection (DI)
+        และการดึงค่ามาใช้งานได้สะอาดกว่า setState มาก
+
+2. ตัวนับ "มีคนถูกใจ" (ซิงค์ข้ามหน้า)
+
+  - เครื่องมือที่แนะนำ: Riverpod (หรือ Provider)
+  - เหตุผล:
+      - Shared State: ข้อมูลถูกใช้ในสองหน้า (List และ Detail) ถ้าใช้ setState
+        คุณจะต้องส่ง Callback/Value กลับไปกลับมา (Prop Drilling)
+        ซึ่งทำให้โค้ดซับซ้อนและดูแลรักษายาก
+      - Consistency: การใช้ Riverpod (เช่น StateNotifier หรือ Notifier)
+        จะช่วยให้ข้อมูลมาจาก "แหล่งที่มาเดียว" (Single Source of Truth)
+        เมื่อกดถูกใจที่หน้ารายละเอียด หน้ารายการจะอัปเดตตามทันทีอัตโนมัติ
+
+3. Animation กระพริบของไอคอนหัวใจ
+
+  - เครื่องมือที่แนะนำ: setState
+  - เหตุผล:
+      - Local State: แอนิเมชันนี้เกิดขึ้นเฉพาะภายใน Widget ตัวเดียว
+        ไม่ได้ส่งผลต่อ logic ทางธุรกิจหรือหน้าจออื่น
+      - Efficiency: การใช้ AnimationController คู่กับ setState (หรือ
+        AnimatedBuilder) ภายใน StatefulWidget
+        เป็นวิธีที่ประหยัดทรัพยากรที่สุดและเหมาะสมกับงาน UI เล็กๆ น้อยๆ
+        ไม่จำเป็นต้องใช้ State Management ตัวใหญ่ให้ซับซ้อนเกินไป
+
+คำแนะนำเพิ่มเติม: หากแอปเริ่มใหญ่ขึ้น แนะนำให้ใช้ Riverpod เป็นหลักแทน Provider
+ครับ เพราะ Riverpod แก้ไขข้อจำกัดหลายอย่างของ Provider (เช่น การเข้าถึง Provider
+จากนอก Widget tree ได้ง่ายกว่า และไม่มีปัญหาเรื่อง Runtime Error บ่อยเท่า) ส่วน
+setState ยังคงต้องเก็บไว้ใช้กับพวกแอนิเมชันหรือฟอร์มรับข้อมูลที่ใช้เฉพาะหน้าครับ
 
 ```
 
@@ -535,12 +585,81 @@ class HomePage extends StatelessWidget {
 
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
-```text
-
+```
+ตรงกันในแง่ของการแบ่งประเภท State โดย Gemini แนะนำให้ใช้ setState สำหรับ Local State (Animation) และใช้ Provider/Riverpod สำหรับ App State
+แต่มีจุดที่ต่างกันคือ เกณฑ์ในการเลือกใช้ Riverpod ในบทเรียนแนะนำให้เริ่มใช้ Provider ก่อนเพราะเรียนรู้ง่าย และจะย้ายไป Riverpod เมื่อต้องการทำ Unit Test ที่เข้มงวดหรือต้องการ Type Safety สูงขึ้น
+แต่ Gemini แนะนำให้เชียร์ไปทาง Riverpod เป็นหลักทันทีโดยให้เหตุผลเรื่องการเลี่ยงปัญหา Runtime Error และจัดการ Dependency ได้ดีกว่า
 ```
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
-```text
 
+  **คำถาม**
+```
+จากกรอบการตัดสินใจในห้องเรียนระบุว่า ให้เริ่มจาก Provider ก่อนเพราะเรียนรู้ง่ายกว่า และค่อยขยับไป Riverpod เมื่อต้องการ Unit Test ที่เข้มงวดหรือ Type Safety ช่วยอธิบายเพิ่มเติมหน่อยว่าในแง่ของการทำ Unit Test และความชันในการเรียนรู้ (Learning Curve) ทั้งสองตัวนี้ต่างกันอย่างไร
+```
+  **คำตอบจากAI**
+```
+คำแนะนำจากห้องเรียนของคุณเป็นพื้นฐานที่ดีมากครับ เพราะ Provider
+คือจุดเริ่มต้นที่ทำให้เราเข้าใจแนวคิด "InheritedWidget"
+(การส่งข้อมูลจากบนลงล่าง) ได้ดีที่สุด
+
+เพื่อให้เห็นภาพชัดเจนขึ้น ผมขอแยกอธิบายเปรียบเทียบในแง่ของ ความชันในการเรียนรู้
+และ การทำ Unit Test ดังนี้ครับ
+
+1. ความชันในการเรียนรู้ (Learning Curve)
+
+Provider: "เริ่มง่าย เพราะล้อไปกับโครงสร้าง Flutter"
+
+  - Concept: Provider ทำงานโดยอิงกับ Widget Tree เป็นหลัก
+    มันเหมือนการเอาข้อมูลไปแปะไว้ที่กิ่งไม้กิ่งหนึ่ง
+    แล้วกิ่งไม้ที่อยู่ต่ำลงไปสามารถหยิบไปใช้ได้
+  - ความง่าย: ถ้าคุณเข้าใจเรื่อง Parent-Child ใน Flutter อยู่แล้ว คุณจะเข้าใจ
+    Provider ได้ทันที
+  - จุดที่ยาก (Pain Point): เมื่อแอปใหญ่ขึ้น คุณจะเจอปัญหา
+    ProviderNotFoundException บ่อยครั้ง (เช่น พยายามเรียกใช้ Provider
+    ในหน้าที่ไม่ได้ระบุไว้ใน Tree) ซึ่งต้องใช้ประสบการณ์ในการแก้
+
+Riverpod: "เริ่มยากกว่า เพราะเป็นแนวคิดใหม่"
+
+  - Concept: Riverpod ไม่ขึ้นกับ Widget Tree มันประกาศตัวแปรไว้แบบ Global
+    (ด้านนอกคลาส) ทำให้เข้าถึงได้จากทุกที่โดยไม่ต้องกังวลเรื่อง BuildContext
+  - ความยาก: คุณต้องเรียนรู้ Object ใหม่ๆ เช่น WidgetRef, ConsumerWidget,
+    ProviderScope และประเภทของ Provider ที่หลากหลาย (FutureProvider, Family,
+    StateNotifier)
+  - ข้อดีที่ได้กลับมา: เมื่อเรียนรู้ผ่านจุดแรกไปแล้ว มันจะเขียนง่ายกว่ามาก เพราะ
+    "ถ้าโค้ดคอมไพล์ผ่าน คือมันทำงานได้" (Compile-time Safety)
+    ไม่ต้องลุ้นตอนรันว่าจะหา Provider เจอไหม
+
+2. การทำ Unit Test (หัวใจสำคัญของแอปขนาดใหญ่)
+
+นี่คือจุดที่ Riverpod ชนะขาด และเป็นเหตุผลว่าทำไมโปรเจกต์ระดับ Enterprise
+ถึงขยับไปหา Riverpod ครับ
+
+การทดสอบใน Provider:
+
+  - Dependency on Flutter: เนื่องจาก Provider ผูกติดกับ Widget Tree เวลาจะเขียน
+    Unit Test คุณมักจะต้องสร้าง "Fake Widget Tree" ขึ้นมาจำลอง หรือต้องใช้
+    WidgetTester เข้ามาช่วย
+  - Mocking: การ Mock ข้อมูลทำได้ยากกว่า
+    เพราะคุณต้องจัดการเรื่องการลำดับความสำคัญใน Tree (เช่น หน้าจอนี้ต้องห่อด้วย
+    MultiProvider ก่อนถึงจะทดสอบได้)
+  - สรุป: การทดสอบ Provider มักจะก้ำกึ่งระหว่าง Unit Test กับ Integration Test
+
+การทดสอบใน Riverpod:
+
+  - Independence: Logic ของ Riverpod แยกออกจาก UI โดยสิ้นเชิง
+    คุณสามารถสร้างสิ่งที่เรียกว่า ProviderContainer เพื่อรันโค้ด logic ในไฟล์
+    .dart เพียวๆ โดยไม่ต้องรัน Flutter/UI เลย
+  - Easy Mocking: Riverpod มีฟีเจอร์ overrides ที่ยอดเยี่ยมมาก เช่น:
+      - "ในแอปจริงให้ดึงข้อมูลจาก API แต่ใน Unit Test ให้ Override
+        แล้วส่งข้อมูลปลอมไปแทน"
+      - เขียนโค้ดแค่บรรทัดเดียวในตอน Setup Test ก็เปลี่ยนพฤติกรรมได้ทันที
+  - สรุป: เขียน Test ได้เร็ว แม่นยำ และเป็น Unit Test ที่แท้จริง
+
+คำแนะนำสำหรับคุณ: หากคุณกำลังทำแอป Campus Marketplace และต้องการ
+"เก็บชั่วโมงบิน" การเริ่มด้วย Provider
+ตามที่ครูสอนเป็นเรื่องที่ดีครับ เพราะมันจะทำให้คุณ "เจ็บ" กับปัญหาเรื่อง
+BuildContext และการหา Provider ไม่เจอ เมื่อคุณย้ายไป Riverpod ในโปรเจกต์ถัดไป
+คุณจะเข้าใจทันทีว่า "ทำไม Riverpod ถึงถูกสร้างมาเพื่อแก้ปัญหานั้น" ครับ
 
 ```
 
@@ -692,8 +811,18 @@ class HomePage extends ConsumerWidget {
 ```
 
 > ✅ **Checkpoint 4.1** รันแอปด้วย `flutter run` (หรือกด F5 ใน VS Code) แล้วทดสอบกดปุ่ม "บันทึก" ที่สินค้าชิ้นใดก็ได้ ตรวจว่าตัวเลข ❤️ ที่ AppBar เพิ่มขึ้นถูกต้อง ถ่ายภาพหน้าจอแนบส่ง
+    <img width="632" height="992" alt="image" src="https://github.com/user-attachments/assets/ce6f5520-ad5b-4e2c-aaf9-f52cfa53526f" />
+
 
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
+>
+| Provider |Riverpod |
+| :--- | :--- |
+| `ChangeNotifier` | `StateNotifier<T>` |
+| `ChangeNotifierProvider` | `StateNotifierProvider` |
+| `StatelessWidget` | `ConsumerWidget` |
+| `context.watch()` | `ref.watch()` |
+| `context.read()` | `ref.read()` |
 
 ---
 
@@ -708,7 +837,9 @@ class HomePage extends ConsumerWidget {
 **ข้อกำหนด**
 
 - ต้องตัดสินใจเองว่าค่าคำค้นหาควรเป็น Ephemeral State หรือ App State พร้อมให้เหตุผลสั้น ๆ ไว้ในช่องด้านล่าง
-  ```text
+  ```
+  ควรเป็น Ephemeral State
+  เพราะค่าที่ผู้ใช้พิมพ์ค้นหานั้น ถูกนำมาใช้เพื่อกรอง UI เฉพาะในหน้า HomePage เท่านั้น ไม่ได้มีความจำเป็นต้องส่งค่านี้ไปให้หน้าจออื่นหรือ Widget อื่นรับรู้ การใช้เพียง setState ภายใน Widget จึงเหมาะสมและเพียงพอแล้ว
 
   ```
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
@@ -720,9 +851,9 @@ class HomePage extends ConsumerWidget {
 **ข้อกำหนด**
 
 - ต้องใช้ `context.read` หรือ `context.watch` ให้ถูกต้องตามหลักการ และอธิบายเหตุผลการเลือก ในช่องด้านล่าง
-  ```text
-
-
+  ```
+  การเรียกคำสั่ง clear() ต้องใช้ context.read
+  เพราะการทำงานนี้เกิดขึ้นเมื่อผู้ใช้กดปุ่ม (Event) ซึ่งเป็นการสั่งงานแบบครั้งเดียว (One-time action) เพื่อไปลบข้อมูล ตัวปุ่มเองไม่ได้ต้องการสมัครเป็นผู้ติดตาม (Subscribe) เพื่อให้ตัวเอง Rebuild เมื่อข้อมูลเปลี่ยนแปลง จึงต้องใช้ read ไม่ใช่ watch
   ```
 - ปุ่มต้องแสดงเฉพาะเมื่อมีรายการโปรดอย่างน้อย 1 รายการเท่านั้น (ถ้ารายการว่างอยู่แล้วไม่ต้องแสดงปุ่มนี้)
 
@@ -731,7 +862,19 @@ class HomePage extends ConsumerWidget {
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) 
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์ ในช่องด้านล่าง
-```text
-
-
 ```
+โจทย์ที่ 1 ช่องค้นหาสินค้า
+- เลือกใช้ Ephemeral State
+เพราะค่าที่ผู้ใช้พิมพ์ค้นหานั้น ถูกนำมาใช้เพื่อกรอง UI เฉพาะในหน้า HomePage เท่านั้น ไม่ได้มีความจำเป็นต้องส่งค่านี้ไปให้หน้าจออื่นหรือ Widget อื่นรับรู้ การใช้เพียง setState ภายใน Widget จึงเหมาะสมและเพียงพอแล้ว
+
+โจทย์ที่ 2: ปุ่ม "ล้างรายการโปรดทั้งหมด"
+- เลือกใช้ App State
+การทำงานของปุ่ม "ตกลง" ใน Dialog นั้น เป็นการยิงคำสั่งแบบครั้งเดียว (One-time Event) ผ่าน `onPressed` เราจึงต้องใช้ `context.read<FavoritesModel>()` (หรือ `ref.read` ในกรณีของ Riverpod) เพื่อส่งคำสั่งไปแก้ไขข้อมูลส่วนกลาง โดยไม่ใช้ `.watch()` เพราะตัวปุ่มใน Dialog ไม่ได้มีความจำเป็นต้องสมัครเป็นผู้ติดตาม (Subscribe) เพื่อให้ตัวเอง Rebuild เมื่อจำนวนรายการโปรดเปลี่ยนแปลง
+```
+
+<img width="747" height="995" alt="image" src="https://github.com/user-attachments/assets/f4da093e-5d8f-44c4-9040-259fcfe47de4" />
+<img width="744" height="995" alt="image" src="https://github.com/user-attachments/assets/cef28d82-a1f1-4f38-bc9b-7090c8a9b943" />
+<img width="758" height="1001" alt="image" src="https://github.com/user-attachments/assets/08603b07-cb01-44f4-a7fe-13ef592ee2f1" />
+<img width="748" height="1011" alt="image" src="https://github.com/user-attachments/assets/2252d6ef-0e07-417c-a8bb-7f04b250af05" />
+<img width="753" height="999" alt="image" src="https://github.com/user-attachments/assets/70f9e8e6-3a97-4f37-88d5-28a4bcc48694" />
+<img width="750" height="1001" alt="image" src="https://github.com/user-attachments/assets/c037a151-9a26-4d22-a3d7-f51831e12425" />
