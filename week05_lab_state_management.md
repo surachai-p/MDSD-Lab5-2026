@@ -240,6 +240,12 @@ class MyApp extends StatelessWidget {
 
 > ✅ **Checkpoint 1.1** รันแอปและกดปุ่ม "🤍 บันทึกเป็นรายการโปรด" ที่สินค้าชิ้นใดก็ได้ ทดสอบว่า (ก) ตัวเลขในไอคอนหัวใจที่ AppBar เพิ่มขึ้นถูกต้อง และ (ข) ปุ่มของสินค้าที่กดไปแล้วเปลี่ยนเป็น "❤️ บันทึกแล้ว" และกดซ้ำไม่ได้ ถ่ายภาพหน้าจอที่เห็นทั้งสองอย่างนี้พร้อมกัน แล้วเปิดไฟล์ `item_card.dart` และ `item_list_section.dart` ให้เห็น constructor ที่ต้องรับพารามิเตอร์ส่งต่อ (Prop Drilling) ชัดเจน แนบส่งในรายงาน
 
+![alt text](image/image.png)
+![alt text](image/image-1.png)
+![alt text](image/image-2.png)
+![alt text](image/image-3.png)
+![alt text](image/image-4.png)
+
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
 ```text
@@ -500,9 +506,10 @@ class HomePage extends StatelessWidget {
 
 > ✅ **Checkpoint 2.2** ทดสอบว่าเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกันทันที ลองกดปุ่มถังขยะลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง ถ่ายภาพหน้าจอทั้งสองหน้าเทียบกันแนบส่ง
 
-```image
-
-```
+![alt text](image/image-5.png)
+![alt text](image/image-6.png)
+![alt text](image/image-7.png)
+![alt text](image/image-8.png)
 
 ---
 
@@ -526,6 +533,30 @@ class HomePage extends StatelessWidget {
 
 ```text
 
+สำหรับการพัฒนาแอป Flutter ของคุณ การเลือกเครื่องมือจัดการ State (State Management) ให้เหมาะสมกับ "ขอบเขต (Scope)" ของข้อมูลเป็นสิ่งสำคัญมาก นี่คือบทวิเคราะห์ครับ:
+1. Dark Mode / Light Mode
+เครื่องมือที่แนะนำ: Riverpod (หรือ Provider)
+เหตุผล:
+Global Scope: ธีมเป็นสถานะที่ส่งผลกระทบต่อ "ทุกหน้าจอ" ในแอปพลิเคชัน
+Dependency Injection: Riverpod/Provider ช่วยให้คุณเข้าถึงสถานะของธีมได้จากทุกที่ ไม่ว่าจะเป็นในระดับ UI หรือระดับ Logic
+Rebuild Efficiency: เมื่อมีการเปลี่ยนโหมด เครื่องมือเหล่านี้จะสั่งให้ MaterialApp ทำการ Rebuild เพื่อเปลี่ยนสีทั้งแอปได้ง่ายและคลีนกว่าการส่งผ่าน Parameter ไปมา
+2. ตัวนับ "คนถูกใจ" (Sync ระหว่างหน้ารายการและหน้าละเอียด)
+เครื่องมือที่แนะนำ: Riverpod (หรือ Provider)
+เหตุผล:
+Shared State: ข้อมูลชุดเดียวกัน (จำนวน Like ของสินค้า ID นั้นๆ) ถูกแสดงผลใน "สองหน้าที่อยู่คนละระดับกัน"
+Data Consistency: หากผู้ใช้กด Like ในหน้ารายละเอียด แล้วกด Back กลับมาหน้ารายการ ข้อมูลต้องเป็นตัวเลขเดียวกันทันที
+การใช้ Riverpod จะช่วยให้คุณมี "Source of Truth" แหล่งเดียว เมื่อข้อมูลใน Provider เปลี่ยน ทุก Widget ที่ฟัง (watch) ข้อมูลนั้นอยู่จะอัปเดตพร้อมกันโดยอัตโนมัติ
+3. Animation กระพริบของไอคอนหัวใจ (ตอนกดถูกใจ)
+เครื่องมือที่แนะนำ: setState (ภายใน StatefulWidget)
+เหตุผล:
+Local / Ephemeral State: แอนิเมชันเป็นสถานะที่เกิดขึ้นและจบลง "เฉพาะภายใน Widget นั้น" หน้าจออื่นไม่จำเป็นต้องรู้ว่าไอคอนหัวใจกำลังกระพริบอยู่ที่เฟรมไหน
+Performance: การใช้ AnimationController ร่วมกับ setState (หรือ AnimatedBuilder) ภายในตัว Widget เองมีประสิทธิภาพสูงที่สุดสำหรับ UI Transition เล็กๆ
+Low Complexity: ไม่จำเป็นต้องนำ Logic ของการขยับไอคอนไปไว้ใน Global State ให้ซับซ้อนโดยไม่จำเป็น
+สรุปหลักการตัดสินใจ (Cheat Sheet):
+setState: ใช้กับสถานะที่ใช้แค่ในหน้าเดียว, UI Animation, หรือฟอร์มที่ยังไม่ได้บันทึก
+Riverpod / Provider: ใช้กับข้อมูลที่ต้องใช้ร่วมกันหลายหน้า, ข้อมูลที่ดึงมาจาก API, หรือการตั้งค่าแอป (Settings/Auth)
+คำแนะนำเพิ่มเติม: หากโปรเจกต์นี้มีขนาดกลางถึงใหญ่ แนะนำให้ฝึกใช้ Riverpod เป็นหลักสำหรับข้อ 1 และ 2 เพราะจัดการเรื่องการอ่านเขียนข้อมูลได้ปลอดภัย (Type-safe) และทดสอบ (Testing) ได้ง่ายกว่าครับ
+
 ```
 
 
@@ -536,11 +567,20 @@ class HomePage extends StatelessWidget {
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
 ```text
+Gemini มีความสอดคล้องกับกรอบการตัดสินใจในบทเรียนในหลักการสำคัญ
+      - การแบ่งประเภท State ตามขอบเขตการใช้งาน Gemini และหนังสือเห็นตรงกันว่า หากเป็นสถานะภายใน Widget เดียว เช่น แอนิเมชันกระพริบของไอคอนหัวใจ (ข้อ 3) ควรใช้ setState เนื่องจากเป็น Local/Ephemeral State
+      - การจัดการ Shared State ข้ามหลายหน้าจอ ทั้งสองแหล่งเห็นตรงกันว่า ข้อมูลที่ต้องใช้ร่วมกันหลายหน้าจอ (เช่น Dark Mode หรือ ตัวนับคนถูกใจ) ไม่ควรใช้ setState แต่ควรขยับไปใช้ Provider หรือ Riverpod
+      - ปัจจัยเรื่อง Type Safety และ Testability Gemini มีการระบุเพิ่มเติมในสรุปว่า Riverpod เหมาะกับงานที่ต้องการ Type Safety และทดสอบ (Testing) ได้ง่าย ซึ่งสอดคล้องกับเงื่อนไขใน Flowchart ของหนังสือ
+  ลำดับขั้นตอนการเลือก
+    คำตอบของ Gemini
+      - แนะนำ Riverpod เป็นตัวเลือกแรก ร่วมกับ Provider สำหรับโจทย์ที่เป็น Global/Shared State โดยอิงจากขนาดและประเภทของงาน
+    กรอบการตัดสินใจในหนังสือ
+      - แนะนำหลักปฏิบัติแบบ Bottom-Up Step-by-Step โดยเริ่มจาก setState ➔ ยกระดับไป Provider ➔ หากต้องการ Type Safety/Testability    สูงค่อยย้ายไป Riverpod
 
 ```
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
 ```text
-
+Gemini มีความสมเหตุสมผลและถูกต้องตามหลักเทคนิค แต่นำเสนอแบบข้ามขั้นเมื่อเทียบกับกรอบในหนังสือ เนื่องจาก Gemini พยายามให้ทางเลือกที่ดีที่สุด (Best Practice) สำหรับโปรเจกต์ทั่วไปทันที ในขณะที่หนังสือเน้นการปลูกฝัง "ลำดับความคิดตามกรอบตัดสินใจ" เพื่อป้องกันไม่ให้ผู้พัฒนา Over-engineering (ซับซ้อนเกินความจำเป็น) ตั้งแต่เริ่มต้น
 
 ```
 
@@ -693,7 +733,18 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.1** รันแอปด้วย `flutter run` (หรือกด F5 ใน VS Code) แล้วทดสอบกดปุ่ม "บันทึก" ที่สินค้าชิ้นใดก็ได้ ตรวจว่าตัวเลข ❤️ ที่ AppBar เพิ่มขึ้นถูกต้อง ถ่ายภาพหน้าจอแนบส่ง
 
+![alt text](image/image-9.png)
+
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
+
+| Provider (ตัวเดิม) | Riverpod (ตัวใหม่) | หมายเหตุ |
+|---|---|---|
+| `class FavoritesModel extends ChangeNotifier` | `class FavoritesNotifier extends StateNotifier<List<Item>>` | ฝ่ายเก็บข้อมูล เปลี่ยนจากคลาสที่ notify ผู้ติดตาม เป็นคลาสที่แทนที่ state ก้อนใหม่ |
+| `notifyListeners()` | `state = [...]` | การแจ้งอัปเดตเปลี่ยนจากเรียกเมธอด เป็นการกำหนด state ตัวใหม่ทั้งก้อน |
+| `ChangeNotifierProvider(...)` ใน `main.dart` | `StateNotifierProvider(...)` + `ProviderScope` ครอบ `runApp()` | ลงทะเบียน Provider เปลี่ยนวิธี (Provider เลิกใช้ MaterialApp builder โปรแกรมจำนวนมากใช้ ProviderScope แทน) |
+| `context.watch<FavoritesModel>()` ใน build() | `ref.watch(favoritesProvider)` ใน ConsumerWidget | วิธีอ่านค่าและสมัครรับอัปเดต เปลี่ยนจาก BuildContext เป็น WidgetRef |
+| `context.read<FavoritesModel>()` ใน onPressed | `ref.read(favoritesProvider.notifier)` ใน ConsumerWidget | วิธีอ่านค่าและเรียกเมธอด เปลี่ยนจาก BuildContext เป็น WidgetRef (ต้องเข้าถึง `.notifier` ได้จริง) |
+| `StatelessWidget` | `ConsumerWidget` | Widget ธรรมดาเปลี่ยนเป็น Consumer เพื่อรับพารามิเตอร์ `ref` เข้ามาใน build() |
 
 ---
 
@@ -724,7 +775,8 @@ class HomePage extends ConsumerWidget {
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) เพื่อฝึกโยกความสามารถเดียวกันข้ามเครื่องมือ State Management สองแบบ
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์
-```text
 
-
-```
+![alt text](image/image-10.png)
+![alt text](image/image-11.png)
+![alt text](image/image-12.png)
+![alt text](image/image-13.png)
