@@ -2,7 +2,6 @@
 
 **วิชา** การพัฒนาซอฟต์แวร์สำหรับอุปกรณ์เคลื่อนที่ | **เครื่องมือ** Flutter, Provider, Riverpod, Google AI Studio (Gemini API)
 
-
 ---
 
 ## วัตถุประสงค์การเรียนรู้
@@ -26,27 +25,27 @@
 
 ## ทบทวนทฤษฎีก่อนเริ่มลงมือปฏิบัติ
 
-ก่อนลงมือเขียนโค้ด ให้ทบทวนแนวคิดสำคัญต่อไปนี้ให้แม่นยำ เพราะทุกขั้นตอนในใบงานนี้อ้างอิงจากหลักการเหล่านี้โดยตรง 
+ก่อนลงมือเขียนโค้ด ให้ทบทวนแนวคิดสำคัญต่อไปนี้ให้แม่นยำ เพราะทุกขั้นตอนในใบงานนี้อ้างอิงจากหลักการเหล่านี้โดยตรง
 
-### State สองชนิด: Ephemeral State กับ App State 
+### State สองชนิด: Ephemeral State กับ App State
 
 **Ephemeral State** คือข้อมูลที่มีความหมายเฉพาะภายใน Widget เดียวหรือกลุ่มเล็ก ๆ ที่อยู่ใกล้กัน ไม่มี Widget อื่นในแอปจำเป็นต้องรู้ (เช่น ค่าที่พิมพ์ค้างใน TextField, ตำแหน่งแท็บที่เลือกอยู่) เปรียบเหมือนโน้ตกระดาษบนโต๊ะทำงานของตัวเอง ใช้ `setState` จัดการก็เพียงพอ
 
 **App State** คือข้อมูลที่ต้องใช้ร่วมกันโดยหลาย Widget ที่อาจอยู่คนละกิ่งของ Widget Tree หรือคนละ Route (เช่น สถานะล็อกอิน, รายการโปรด, ธีมสี) เปรียบเหมือนกระดานประกาศกลางที่ทุกแผนกต้องเห็นตรงกัน ต้องใช้ InheritedWidget, Provider หรือ Riverpod จัดการ
 
 | มิติ | Ephemeral State | App State |
-|---|---|---|
+| --- | --- | --- |
 | ขอบเขตการมองเห็น | Widget เดียวหรือกลุ่มเล็ก ๆ | หลายหน้าจอ / ทั้งแอป |
 | อายุการใช้งาน | สั้น มักหายเมื่อ Widget dispose | ยาว อยู่ตลอดการใช้งานแอป |
 | เครื่องมือที่เหมาะสม | `setState` ภายใน StatefulWidget | InheritedWidget, Provider, Riverpod |
 
 ในใบงานนี้ **รายการสินค้าที่บันทึกไว้ (Favorites)** คือตัวอย่างของ App State ชัดเจน เพราะต้องแสดงผลตรงกันทั้งที่ AppBar ของหน้า Home และในหน้า Favorites ที่แยก Route ออกไป — นี่คือเหตุผลที่ส่วนที่ 1 ของใบงานจะทำให้เห็นปัญหาก่อน แล้วส่วนที่ 2 จึงแก้ด้วย Provider
 
-### Prop Drilling คือปัญหาอะไร 
+### Prop Drilling คือปัญหาอะไร
 
 เมื่อใช้ `setState` เก็บ App State ไว้ที่ Widget ต้นทาง (เช่น `HomePage`) แล้วต้องส่งค่า/ฟังก์ชันลงไปให้ Widget ลูกหลานที่อยู่ลึกหลายชั้นผ่าน constructor ทีละชั้น ทั้งที่ Widget ตัวกลางไม่ได้ใช้ค่าเหล่านั้นเองเลย เรียกปรากฏการณ์นี้ว่า **Prop Drilling** ยิ่ง Widget ตัวกลางเพิ่มขึ้น ยิ่งต้องแก้ constructor ซ้ำไปเรื่อย ๆ และปัญหาจะรุนแรงขึ้นไปอีกเมื่อต้องส่งข้อมูลข้าม Route (เพราะ constructor ส่งได้เฉพาะพ่อแม่ลูกในทรีเดียวกันเท่านั้น) — ส่วนที่ 1 ของใบงานนี้จะให้ลงมือสร้างปัญหานี้ด้วยตัวเองก่อน เพื่อให้เห็นภาพว่า Provider เข้ามาแก้อะไร
 
-### หลักการของ Provider 
+### หลักการของ Provider
 
 Provider คือแพ็กเกจที่ห่อหุ้ม `InheritedWidget` (กลไกกระจายข้อมูลลงทรีของ Flutter เอง) ให้ใช้งานง่ายขึ้น โดยผนวกกับ **ChangeNotifier** ซึ่งมีเมธอด `notifyListeners()` ทำหน้าที่เหมือน `setState` แต่ขยายขอบเขตจาก "Widget เดียว" เป็น "ผู้ฟังจำนวนเท่าใดก็ได้ทั่วทั้งแอป" หลักการสำคัญที่ต้องจำให้แม่นคือ
 
@@ -54,7 +53,7 @@ Provider คือแพ็กเกจที่ห่อหุ้ม `Inherited
 - **`context.watch<T>()`**: อ่านค่าและสมัครเป็นผู้ติดตาม จะถูก rebuild ทุกครั้งที่ข้อมูลเปลี่ยน ใช้กับส่วนที่ต้อง *แสดงผล*
 - **`context.read<T>()`**: อ่านค่าครั้งเดียวเพื่อเรียกเมธอด ไม่สมัครเป็นผู้ติดตาม ใช้กับการกดปุ่ม (`onPressed`) เพื่อไม่ให้ Widget นั้น rebuild โดยไม่จำเป็น
 
-### หลักการของ Riverpod 
+### หลักการของ Riverpod
 
 Riverpod คือวิวัฒนาการของ Provider ที่แก้ข้อจำกัดเรื่องการต้องพึ่งพา `BuildContext` โดยใช้ `WidgetRef` แทน (`ref.watch(...)` เทียบเท่า `context.watch<T>()` และ `ref.read(...)` เทียบเท่า `context.read<T>()`) และเพิ่มความปลอดภัยด้าน Type ตั้งแต่ตอนเขียนโค้ด (compile-time) แทนที่จะพังตอนรันจริง แนวคิดหลักเหมือนกับ Provider ทุกประการ เปลี่ยนแค่วิธีเข้าถึงข้อมูล
 
@@ -69,8 +68,9 @@ Riverpod คือวิวัฒนาการของ Provider ที่แ�
 ก่อนใช้ Provider เราจะสร้างสถานการณ์ปัญหาขึ้นมาก่อนด้วยตัวเอง เพื่อให้เห็นภาพว่า Provider แก้ปัญหาอะไร ให้ทำตามทีละขั้นตอนต่อไปนี้ให้ครบ หลังจากนั้นจะได้แอปที่รันได้จริงและเห็นปัญหา Prop Drilling ชัดเจน
 
 ### ขั้นตอนที่ 1.1: สร้างโมเดล Item
+
 สร้างโปรเจกต์ใหม่ชื่อ `campus_marketplace` ด้วยคำสั่ง `flutter create campus_marketplace` หลังจากนั้น
-สร้างไฟล์ `lib/models/item.dart` และเพิ่มโค้ดต่อไปนี้ — นี่คือจุดเริ่มต้นของโมเดล `Item` ที่จะเป็นแกนกลางของแอป Campus Marketplace ตลอดทั้งเทอม 
+สร้างไฟล์ `lib/models/item.dart` และเพิ่มโค้ดต่อไปนี้ — นี่คือจุดเริ่มต้นของโมเดล `Item` ที่จะเป็นแกนกลางของแอป Campus Marketplace ตลอดทั้งเทอม
 
 ```dart
 class Item {
@@ -240,10 +240,12 @@ class MyApp extends StatelessWidget {
 
 > ✅ **Checkpoint 1.1** รันแอปและกดปุ่ม "🤍 บันทึกเป็นรายการโปรด" ที่สินค้าชิ้นใดก็ได้ ทดสอบว่า (ก) ตัวเลขในไอคอนหัวใจที่ AppBar เพิ่มขึ้นถูกต้อง และ (ข) ปุ่มของสินค้าที่กดไปแล้วเปลี่ยนเป็น "❤️ บันทึกแล้ว" และกดซ้ำไม่ได้ ถ่ายภาพหน้าจอที่เห็นทั้งสองอย่างนี้พร้อมกัน แล้วเปิดไฟล์ `item_card.dart` และ `item_list_section.dart` ให้เห็น constructor ที่ต้องรับพารามิเตอร์ส่งต่อ (Prop Drilling) ชัดเจน แนบส่งในรายงาน
 
-**คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
+![Checkpoint 1.1 Prop Drilling Demo (หลังกดบันทึกโปรด)](images/checkpoint1_after_save.png)
+
+**คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ
 
 ```text
-
+ข้าม Route แล้วจะไม่สามารถเข้าถึงข้อมูลได้ เพราะ State ถูกเก็บไว้แค่ใน HomePage หน้าเดียว ทำให้แชร์ข้อมูลข้ามหน้าจอไม่ได้และโค้ดผูกติดกันยุ่งเหยิง
 ```
 
 ---
@@ -500,9 +502,13 @@ class HomePage extends StatelessWidget {
 
 > ✅ **Checkpoint 2.2** ทดสอบว่าเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกันทันที ลองกดปุ่มถังขยะลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง ถ่ายภาพหน้าจอทั้งสองหน้าเทียบกันแนบส่ง
 
-```image
+![หน้า Home เมื่อบันทึกสินค้า 2 ชิ้น (AppBar แสดง ❤️ 2)](images/checkpoint2_home_saved.png)
 
-```
+![หน้า Favorites แสดงรายการสินค้าและมูลค่ารวม ฿600](images/checkpoint2_favorites_page.png)
+
+![หน้า Favorites หลังกดปุ่มลบ (เหลือมูลค่ารวม ฿450)](images/checkpoint2_favorites_after_delete.png)
+
+![หน้า Home หลังย้อนกลับมา (AppBar แสดง ❤️ 1 และปุ่มสินค้านั้นกลับมากดได้อีกครั้ง)](images/checkpoint2_home_after_return.png)
 
 ---
 
@@ -510,7 +516,7 @@ class HomePage extends StatelessWidget {
 
 ### ขั้นตอนที่ 3.1
 
-เปิด Google AI Studio (https://aistudio.google.com) แล้วสร้าง Prompt นี้กับ Gemini
+เปิด Google AI Studio (<https://aistudio.google.com>) แล้วสร้าง Prompt นี้กับ Gemini
 
 ```
 ฉันกำลังพัฒนาแอป Flutter ตลาดนัดออนไลน์ (Campus Marketplace) ที่มีฟีเจอร์ต่อไปนี้:
@@ -522,12 +528,33 @@ class HomePage extends StatelessWidget {
 และอธิบายเหตุผลของแต่ละข้อสั้น ๆ
 ```
 
-บันทึกคำตอบที่ได้จาก Gemini 
+บันทึกคำตอบที่ได้จาก Gemini
 
-```text
+```markdown
+### 🤖 สรุปวิเคราะห์แนวทางการเลือก State Management จาก Gemini
 
+#### 1. Dark Mode / Light Mode
+- **เครื่องมือที่แนะนำ:** `Riverpod` (หรือ `Provider`)
+- **เหตุผล:** จัดเป็น **Global App State** ที่ส่งผลต่อทั้งแอปพลิเคชัน ข้อมูลต้องถูกจัดเก็บไว้ที่ศูนย์กลางเพื่อให้ทุกหน้าจอเข้าถึง Theme เดียวกันได้โดยไม่ต้องใช้ Constructor Injection (`setState`) ส่งต่อทีละชั้น
+
+#### 2. ตัวนับ "มีคนถูกใจแล้วกี่คน" (ซิงค์ระหว่างหน้า)
+- **เครื่องมือที่แนะนำ:** `Riverpod` (หรือ `Provider`)
+- **เหตุผล:** จัดเป็น **Shared App State** ข้อมูลต้องซิงค์ตรงกันระหว่างหน้ารายการ (List) และหน้ารายละเอียด (Detail) ทันทีที่มีการกดถูกใจ โดยไม่ต้องคอยดึงข้อมูลใหม่จาก Server
+
+#### 3. Animation กระพริบของไอคอนหัวใจ (เฉพาะใน Widget เดียว)
+- **เครื่องมือที่แนะนำ:** `setState`
+- **เหตุผล:** จัดเป็น **Local UI State (Ephemeral State)** ทำงานเฉพาะภายใน `IconButton` เดียว การใช้ `setState` ร่วมกับ `AnimationController` ให้ประสิทธิภาพสูงสุดและไม่ซับซ้อนโดยไม่จำเป็น
+
+---
+
+### 📊 ตารางสรุปการตัดสินใจ
+
+| ฟีเจอร์ | ประเภท State | เครื่องมือที่แนะนำ | เหตุผลสรุป |
+| :--- | :--- | :--- | :--- |
+| **Theme (Dark/Light)** | Global App State | **Riverpod / Provider** | เข้าถึงได้จากทุกหน้าในแอปที่ศูนย์กลาง |
+| **Like Counter (Sync)** | Shared App State | **Riverpod / Provider** | ข้อมูลซิงค์ตรงกันระหว่างหน้า List และ Detail |
+| **Heart Animation** | Ephemeral State | **setState** | ทำงานเฉพาะจุดภายใน Widget เดียว ประสิทธิภาพสูงสุด |
 ```
-
 
 ### ขั้นตอนที่ 3.2: ประเมินคำตอบของ AI
 
@@ -536,12 +563,13 @@ class HomePage extends StatelessWidget {
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
 ```text
-
+ตรงกันเรื่องแบ่ง Ephemeral State กับ App State แต่ต่างที่ Gemini แนะนำ Riverpod เป็นหลัก ส่วนบทเรียนให้เริ่มจาก Provider ก่อนเพราะเข้าใจง่ายกว่า
 ```
+
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
+
 ```text
-
-
+ถามเพิ่มเรื่องขอบเขต Widget และ BuildContext ได้คำตอบว่า Animation เป็น Ephemeral State ทำงานใน Widget เดียวจึงใช้ setState เพื่อประสิทธิภาพสูงสุด ส่วน Theme เป็น App State บนราก Tree ต้องใช้ Provider หรือ Riverpod ส่งต่อข้อมูลให้ทุก Widget rebuild ตาม
 ```
 
 ⚠️ **ข้อควรระวัง**: AI เป็นเครื่องมือช่วยคิด ไม่ใช่คำตอบสุดท้าย ผู้เรียนต้องอธิบายเหตุผลของการเลือกใช้เครื่องมือได้ด้วยตัวเองเสมอ ตามหลักการใช้ AI ในการพัฒนาซอฟต์แวร์ของวิชานี้
@@ -614,7 +642,7 @@ final catalog = <Item>[
 สร้างไฟล์ใหม่ชื่อ `lib/favorites_notifier.dart` — คลาสนี้ทำหน้าที่เดียวกับ `FavoritesModel` ในส่วนที่ 2 ทุกเมธอด (add, remove, totalValue) เพียงแต่เปลี่ยนวิธีเก็บ State จากตัวแปร mutable ภายในคลาสมาเป็นการ "แทนที่ state ก้อนใหม่" ทั้งหมดทุกครั้งที่แก้ไข ตารางนี้ช่วยให้เห็นว่ากำลังแปลงอะไรเป็นอะไร
 
 | ในโปรเจกต์หลัก (Provider) | ในโปรเจกต์ทดลองนี้ (Riverpod) |
-|---|---|
+| --- | --- |
 | `class FavoritesModel extends ChangeNotifier` | `class FavoritesNotifier extends StateNotifier<List<Item>>` |
 | `final List<Item> _items = []` + `notifyListeners()` | `state = [...state, item]` (แทนที่ก้อนใหม่ทั้งหมด) |
 | ลงทะเบียนด้วย `ChangeNotifierProvider` | ลงทะเบียนด้วย `StateNotifierProvider` |
@@ -693,7 +721,20 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.1** รันแอปด้วย `flutter run` (หรือกด F5 ใน VS Code) แล้วทดสอบกดปุ่ม "บันทึก" ที่สินค้าชิ้นใดก็ได้ ตรวจว่าตัวเลข ❤️ ที่ AppBar เพิ่มขึ้นถูกต้อง ถ่ายภาพหน้าจอแนบส่ง
 
+![Checkpoint 4.1 Riverpod Trial (AppBar แสดง ❤️ 1)](images/checkpoint4_riverpod_saved.png)
+
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
+
+### ตารางเปรียบเทียบการแปลงโค้ดจาก Provider เป็น Riverpod
+
+| หัวข้อ | Provider | Riverpod |
+|---|---|---|
+| **คลาสสร้าง State Model** | `ChangeNotifier` | `StateNotifier<T>` |
+| **การเปลี่ยนค่า State** | แก้ไขข้อมูลโดยตรงและเรียก `notifyListeners()` | แทนที่ด้วย State ก้อนใหม่ `state = [...state, item]` |
+| **การลงทะเบียน Provider** | `ChangeNotifierProvider` ภายใน Widget Tree | `StateNotifierProvider` ประกาศเป็น Global Variable |
+| **คลาสของ Widget** | `StatelessWidget` | `ConsumerWidget` |
+| **การดึง State มาแสดงผล** | `context.watch<FavoritesModel>()` | `ref.watch(favoritesProvider)` |
+| **การเรียกใช้งาน Method** | `context.read<FavoritesModel>().add()` | `ref.read(favoritesProvider.notifier).add()` |
 
 ---
 
@@ -724,7 +765,21 @@ class HomePage extends ConsumerWidget {
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) เพื่อฝึกโยกความสามารถเดียวกันข้ามเครื่องมือ State Management สองแบบ
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์
+
+### 1. ภาพหน้าจอฟีเจอร์ค้นหาสินค้า (Search Box)
+
+![Checkpoint 5.1 ฟีเจอร์ค้นหาสินค้า](images/checkpoint5_search_filtered.png)
+
+### 2. ภาพ Dialog ยืนยันการล้างรายการโปรดทั้งหมด
+
+![Checkpoint 5.1 Dialog ยืนยันการล้างรายการโปรด](images/checkpoint5_clear_dialog.png)
+
+### 3. เหตุผลการเลือกชนิด State
+
 ```text
+โจทย์ที่ 1 ช่องค้นหาสินค้า
+เลือกใช้ Ephemeral State ด้วย setState เพราะคำค้นหาถูกใช้กรองรายการเฉพาะใน HomePage หน้าเดียว ไม่มี Route หรือ Widget อื่นต้องใช้ร่วม จึงใช้ setState ที่น้ำหนักเบาและตรงวัตถุประสงค์ที่สุด
 
-
+โจทย์ที่ 2 ปุ่มล้างรายการโปรดทั้งหมด
+เลือกใช้ App State ด้วย Provider เพราะต้องจัดการข้อมูลรายการโปรดส่วนกลาง โดยใช้ context.watch<FavoritesModel>() สำหรับตรวจสอบ favorites.items.isNotEmpty ในการซ่อนหรือแสดงปุ่ม และใช้ context.read<FavoritesModel>().clear() ใน onPressed เพื่อสั่งงานโดยไม่เกิดการสมัครฟังซ้ำซ้อน
 ```
