@@ -241,10 +241,11 @@ class MyApp extends StatelessWidget {
 > ✅ **Checkpoint 1.1** รันแอปและกดปุ่ม "🤍 บันทึกเป็นรายการโปรด" ที่สินค้าชิ้นใดก็ได้ ทดสอบว่า (ก) ตัวเลขในไอคอนหัวใจที่ AppBar เพิ่มขึ้นถูกต้อง และ (ข) ปุ่มของสินค้าที่กดไปแล้วเปลี่ยนเป็น "❤️ บันทึกแล้ว" และกดซ้ำไม่ได้ ถ่ายภาพหน้าจอที่เห็นทั้งสองอย่างนี้พร้อมกัน แล้วเปิดไฟล์ `item_card.dart` และ `item_list_section.dart` ให้เห็น constructor ที่ต้องรับพารามิเตอร์ส่งต่อ (Prop Drilling) ชัดเจน แนบส่งในรายงาน
 
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
-
-```text
-
 ```
+การเพิ่ม FavoritesPage เป็น route แยกแต่ยังใช้ prop‑drilling จะต้องส่งสถานะกับ callbacks ผ่านหลายชั้นหรือผ่าน Navigator ทำให้โค้ดยุ่งเหยิงและผูกกันแน่น (tight coupling), เสี่ยงเกิดสถานะไม่สอดคล้อง (stale/duplicate) ถ้าลงข้อมูลซ้ำหรือพลาดอัปเดต, เพิ่ม boilerplate และทำให้การรีแฟคเตอร์/ทดสอบยาก รวมถึงอาจเกิดปัญหาการซิงค์หรือ race เมื่อหลายหน้าแก้ไขชุดข้อมูลเดียวกัน และประสิทธิภาพตกจากการรี‑render ที่ไม่จำเป็น — จะแก้ได้ด้วยการย้ายสถานะเป็นศูนย์กลาง (Provider/Riverpod/InheritedWidget/Bloc ฯลฯ).
+```
+
+<img width="1919" height="1022" alt="image" src="https://github.com/user-attachments/assets/62effd11-2b70-448e-9b30-f8ed4c02e393" />
 
 ---
 
@@ -500,9 +501,12 @@ class HomePage extends StatelessWidget {
 
 > ✅ **Checkpoint 2.2** ทดสอบว่าเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกันทันที ลองกดปุ่มถังขยะลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง ถ่ายภาพหน้าจอทั้งสองหน้าเทียบกันแนบส่ง
 
-```image
 
-```
+<img width="639" height="462" alt="image" src="https://github.com/user-attachments/assets/3fc1fe12-a61b-4e35-8fe6-4786d64cdd54" />
+<img width="642" height="462" alt="image" src="https://github.com/user-attachments/assets/b1159c8a-799b-417b-b54e-a757421d6536" />
+<img width="641" height="461" alt="image" src="https://github.com/user-attachments/assets/f5832389-b1a8-49fe-8688-f6d915f3349e" />
+
+
 
 ---
 
@@ -525,7 +529,23 @@ class HomePage extends StatelessWidget {
 บันทึกคำตอบที่ได้จาก Gemini 
 
 ```text
-
+สำหรับการพัฒนาแอป Campus Marketplace ด้วย Flutter การเลือกเครื่องมือจัดการ State ที่เหมาะสมจะช่วยให้โค้ดสะอาดและดูแลรักษาง่าย นี่คือบทวิเคราะห์ครับ:
+1. Dark Mode / Light Mode
+เครื่องมือที่แนะนำ: Riverpod (หรือ Provider)
+เหตุผล: ฟีเจอร์นี้เป็น Global State ที่ส่งผลกระทบต่อทุก Widget ในแอปพลิเคชัน การใช้ Riverpod/Provider จะช่วยให้คุณเก็บค่า ThemeMode ไว้ที่จุดเดียว (Top-level) และทุกหน้าจอสามารถเข้าถึงหรือสั่งเปลี่ยนโหมดได้ทันทีโดยไม่ต้องส่งค่าผ่าน Constructor ให้ยุ่งยาก (Prop Drilling)
+2. ตัวนับ "คนถูกใจ" (ซิงค์ระหว่างหน้า List และ Detail)
+เครื่องมือที่แนะนำ: Riverpod (หรือ Provider)
+เหตุผล: ฟีเจอร์นี้คือการจัดการ App State (Shared State) ข้อมูลชุดเดียวกัน (เช่น สินค้า ID: 101) ถูกแสดงผลในสองหน้าที่อยู่คนละตำแหน่งใน Navigation Stack หากคุณกดถูกใจในหน้า Detail แล้วกด back กลับมาหน้า List ข้อมูลต้องเป็นตัวเลขเดียวกัน การใช้ Riverpod จะช่วยจัดการ Logic การอัปเดตข้อมูลใน Data Model กลาง และสะท้อนผลไปยังทุก Widget ที่ฟัง (Listen) ข้อมูลตัวนั้นอยู่โดยอัตโนมัติ
+3. Animation กระพริบของไอคอนหัวใจ (เฉพาะตอนกด)
+เครื่องมือที่แนะนำ: setState
+เหตุผล: ฟีเจอร์นี้เป็น Ephemeral State (Local State) ซึ่งเป็นสถานะชั่วคราวที่เกิดขึ้นและจบลงภายใน Widget ตัวเดียว (เฉพาะตัวไอคอนนั้นๆ) การใช้ setState ร่วมกับ AnimationController มีประสิทธิภาพสูงสุด (Low Overhead) เพราะไม่ต้องไปรบกวน State Management ภายนอก และทำให้ Widget นั้นจัดการตัวเองได้เบ็ดเสร็จ (Self-contained)
+สรุปตารางวิเคราะห์
+ฟีเจอร์	ระดับของ State	เครื่องมือที่แนะนำ	เหตุผลหลัก
+Dark/Light Mode	Global	Riverpod	เข้าถึงได้จากทุกหน้า และจัดการ Rebuild ทั้งแอปได้ง่าย
+ตัวนับถูกใจ (Sync)	Shared	Riverpod	รักษาความถูกต้องของข้อมูล (Data Consistency) ระหว่างหน้าจอ
+Animation หัวใจ	Local	setState	ทำงานเฉพาะจุด รวดเร็ว ไม่ต้องแชร์ข้อมูลกับใคร
+ข้อแนะนำเพิ่มเติม:
+หากโปรเจกต์เริ่มมีขนาดใหญ่ แนะนำให้ใช้ Riverpod เป็นหลักสำหรับข้อ 1 และ 2 เพราะ Riverpod จัดการเรื่องการทำลาย State ที่ไม่ได้ใช้ (Auto-dispose) และการทดสอบโค้ด (Testing) ได้ดีกว่า Provider ครับ
 ```
 
 
@@ -536,7 +556,7 @@ class HomePage extends StatelessWidget {
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
 ```text
-
+คำแนะนำของ Gemini สอดคล้องกับกรอบการตัดสินใจในบทเรียนหัวข้อ 5.7 ในแง่ของหลักการพื้นฐานแทบทั้งหมด โดยเฉพาะการแยกประเภท State เป็น Ephemeral สำหรับ Widget เดียว (เช่น แอนิเมชันหัวใจที่ใช้ setState) และ App State สำหรับหลายหน้าจอ (เช่น Dark Mode และการซิงค์ยอดถูกใจ) แต่จะมีความแตกต่างที่ชัดเจนในเรื่องของ "ลำดับและเกณฑ์การตัดสินใจ" สำหรับ App State ครับ กล่าวคือ บทเรียนจะเน้นหลักปฏิบัติที่ว่าเมื่อข้อมูลใช้ข้ามหน้าจอ ให้เริ่มใช้งาน Provider เป็นอันดับแรกก่อนเสมอ และจะตัดสินใจย้ายไปใช้ Riverpod ก็ต่อเมื่อมีเงื่อนไขชัดเจนว่า "ต้องการ Type Safety และเทสต์ง่าย" พร้อมทั้งเตือนว่าอย่าเพิ่งรีบข้ามไปใช้ Riverpod เพียงเพราะเป็นมาตรฐานอุตสาหกรรม ในขณะที่ Gemini จะมีแนวโน้มเชียร์ให้ใช้ Riverpod เป็นตัวเลือกหลักตั้งแต่แรกโดยอิงจากแนวโน้มขนาดของโปรเจกต์และฟีเจอร์อย่าง Auto-dispose ซึ่งแม้คำแนะนำของ Gemini จะเป็นแนวปฏิบัติที่ดีในการทำงานจริง (Best Practice) แต่ในบริบทของการเรียนหรือการสอบที่อิงตามตำรานี้ คุณควรยึดลำดับการตัดสินใจแบบค่อยเป็นค่อยไป (setState $\rightarrow$ Provider $\rightarrow$ Riverpod) ตามแผนภาพในหนังสือเป็นหลัก
 ```
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
 ```text
@@ -695,6 +715,11 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
 
+
+<img width="532" height="383" alt="image" src="https://github.com/user-attachments/assets/76ab92e9-e38d-4ea7-ac1e-a0d6e8259a03" />
+
+
+
 ---
 
 ## ส่วนที่ 5 (ทำด้วยตนเอง): ออกแบบฟีเจอร์เพิ่มด้วยตัวเอง
@@ -709,7 +734,7 @@ class HomePage extends ConsumerWidget {
 
 - ต้องตัดสินใจเองว่าค่าคำค้นหาควรเป็น Ephemeral State หรือ App State พร้อมให้เหตุผลสั้น ๆ ไว้ในช่องด้านล่าง
   ```text
-
+   ค่าคำค้นหาเป็น UI‑only, ชั่วคราว และไม่จำเป็นต้องแชร์ข้ามหน้า/persisted (ไม่ต้องการ global coordination หรือ persistence) — ใช้ setState ง่ายสุด เบาที่สุด และจำกัดการรี‑build ให้แค่อินสแตนซ์ของหน้าเดียว เมื่ออนาคตต้องการแชร์คำค้นหา (เช่น deep link, saved filters หรือ sync ระหว่างหลายหน้า) ค่อยย้ายเป็น App State (Provider/Riverpod/Bloc) ได้
   ```
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
 
@@ -721,8 +746,8 @@ class HomePage extends ConsumerWidget {
 
 - ต้องใช้ `context.read` หรือ `context.watch` ให้ถูกต้องตามหลักการ และอธิบายเหตุผลการเลือก ในช่องด้านล่าง
   ```text
-
-
+  context.watch: เหมาะเมื่อ widget ต้องการสมัครรับการเปลี่ยนแปลงและรีบิลด์ (เช่น แสดง/ซ่อนปุ่มตามสถานะ และแสดงรายการ)
+  context.read: เหมาะสำหรับการกระทำแบบครั้งเดียว (เช่น clear/remove) เพราะไม่ต้องการรีบิลด์จากจุดที่เรียก
   ```
 - ปุ่มต้องแสดงเฉพาะเมื่อมีรายการโปรดอย่างน้อย 1 รายการเท่านั้น (ถ้ารายการว่างอยู่แล้วไม่ต้องแสดงปุ่มนี้)
 
@@ -731,7 +756,9 @@ class HomePage extends ConsumerWidget {
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) 
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์ ในช่องด้านล่าง
-```text
+
+<img width="1590" height="901" alt="image" src="https://github.com/user-attachments/assets/1a78b094-d260-42c1-8b0d-6c886fd12e9c" />
+<img width="1588" height="903" alt="image" src="https://github.com/user-attachments/assets/326a15d3-a085-43da-941b-ebb0d0a63394" />
 
 
-```
+
