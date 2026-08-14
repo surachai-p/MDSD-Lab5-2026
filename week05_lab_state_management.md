@@ -503,9 +503,14 @@ class HomePage extends StatelessWidget {
 
 > ✅ **Checkpoint 2.2** ทดสอบว่าเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกันทันที ลองกดปุ่มถังขยะลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง ถ่ายภาพหน้าจอทั้งสองหน้าเทียบกันแนบส่ง
 
-```image
+2.1
+![](https://github.com/user-attachments/assets/73a5a3f7-d01b-4615-9b99-6a05e074b9e3)
 
-```
+2.2
+![](https://github.com/user-attachments/assets/70dcab36-70a3-4df6-99a2-3509a3dd483b)
+![](https://github.com/user-attachments/assets/d406e917-e6e2-437f-95cd-8f634cb50229)
+![](https://github.com/user-attachments/assets/d1c99537-98b9-4e07-a8d6-b379378f9100)
+
 
 ---
 
@@ -698,7 +703,12 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
 
+
+
+
 ---
+
+
 
 ## ส่วนที่ 5 (ทำด้วยตนเอง): ออกแบบฟีเจอร์เพิ่มด้วยตัวเอง
 
