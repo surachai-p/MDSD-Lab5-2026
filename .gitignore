@@ -1,0 +1,13 @@
+# Flutter / Dart build files inside subfolders
+**/build/
+**/.dart_tool/
+**/.pub-cache/
+**/.pub/
+*.apk
+
+# Temp & OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
