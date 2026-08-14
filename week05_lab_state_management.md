@@ -239,10 +239,14 @@ class MyApp extends StatelessWidget {
 ```
 
 > ✅ **Checkpoint 1.1** รันแอปและกดปุ่ม "🤍 บันทึกเป็นรายการโปรด" ที่สินค้าชิ้นใดก็ได้ ทดสอบว่า (ก) ตัวเลขในไอคอนหัวใจที่ AppBar เพิ่มขึ้นถูกต้อง และ (ข) ปุ่มของสินค้าที่กดไปแล้วเปลี่ยนเป็น "❤️ บันทึกแล้ว" และกดซ้ำไม่ได้ ถ่ายภาพหน้าจอที่เห็นทั้งสองอย่างนี้พร้อมกัน แล้วเปิดไฟล์ `item_card.dart` และ `item_list_section.dart` ให้เห็น constructor ที่ต้องรับพารามิเตอร์ส่งต่อ (Prop Drilling) ชัดเจน แนบส่งในรายงาน
+<img width="1710" height="1112" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 11 22 31" src="https://github.com/user-attachments/assets/39ecfba0-62a6-408b-b6b3-b71acef40453" />
+<img width="1710" height="1112" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 11 22 27" src="https://github.com/user-attachments/assets/9d97a664-0c64-4e20-b60e-2e6b258f8ca7" />
 
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
-
-```text
+```
+จะเกิดปัญหา State ของรายการโปรดอยู่ใน HomePage ทำให้ FavoritesPage ซึ่งเป็นคนละ Route
+ไม่สามารถเข้าถึง _savedItems ได้โดยตรง ต้องส่งข้อมูลผ่านหลายชั้นหรือใช้วิธีจัดการ State ร่วม เช่น Provider
+เพื่อให้ทั้งสองหน้าสามารถใช้ข้อมูลชุดเดียวกันได้
 
 ```
 
@@ -500,9 +504,9 @@ class HomePage extends StatelessWidget {
 
 > ✅ **Checkpoint 2.2** ทดสอบว่าเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกันทันที ลองกดปุ่มถังขยะลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง ถ่ายภาพหน้าจอทั้งสองหน้าเทียบกันแนบส่ง
 
-```image
+<img width="1710" height="1112" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 11 17 39" src="https://github.com/user-attachments/assets/0c999819-238e-4529-bce0-7e71f38f318f" />
+<img width="1710" height="1112" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 11 13 03" src="https://github.com/user-attachments/assets/4e97919e-5ddc-4141-bd65-ad8ef90f722b" />
 
-```
 
 ---
 
@@ -535,14 +539,22 @@ class HomePage extends StatelessWidget {
 
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
-```text
+```
+คำตอบของ Gemini สอดคล้องกับกรอบการตัดสินใจโดยรวม โดยแยกได้ถูกต้องว่า
+Stateแบบไหนควรใช้ Global/Shared State และ State แบบไหนควรใช้ Local State
+Dark Mode / Light Mode: เหมาะกับ Provider หรือ Riverpod เพราะเป็น State ระดับแอปและมีผลต่อหลายหน้าจอ
+ตัวนับคนถูกใจ: เหมาะกับ Provider หรือ Riverpod เพราะเป็น Shared State ที่ต้องซิงค์ข้อมูลระหว่างหลาย Route
+Animation หัวใจกระพริบ: เหมาะกับ setState เพราะเป็น Ephemeral/Local State ที่ใช้เฉพาะ Widget นั้น
+จุดที่ยังไม่ครบถ้วน: Gemini ยังไม่ได้อธิบายเรื่อง ขอบเขตของ Provider (Widget Scope) อย่างละเอียด
+เช่น ควรวาง Provider ไว้ระดับใด หาก State ต้องใช้เฉพาะบางส่วนของ Widget Tree ไม่จำเป็นต้องครอบทั้งแอปเสมอไป นอกจากนี้ยังกล่าวถึง Provider
+และ Riverpod ค่อนข้างกว้าง แต่ไม่ได้เปรียบเทียบข้อดีข้อเสียของแต่ละตัวตามบริบทของโจทย์โดยละเอียด
 
 ```
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
-```text
+<img width="784" height="333" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 11 28 34" src="https://github.com/user-attachments/assets/d116db00-764d-4cd0-ae63-c485e4d05897" />
+<img width="772" height="781" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 11 28 23" src="https://github.com/user-attachments/assets/cd73f101-6ed9-4d41-842f-5850648b7549" />
 
 
-```
 
 ⚠️ **ข้อควรระวัง**: AI เป็นเครื่องมือช่วยคิด ไม่ใช่คำตอบสุดท้าย ผู้เรียนต้องอธิบายเหตุผลของการเลือกใช้เครื่องมือได้ด้วยตัวเองเสมอ ตามหลักการใช้ AI ในการพัฒนาซอฟต์แวร์ของวิชานี้
 
@@ -693,7 +705,19 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.1** รันแอปด้วย `flutter run` (หรือกด F5 ใน VS Code) แล้วทดสอบกดปุ่ม "บันทึก" ที่สินค้าชิ้นใดก็ได้ ตรวจว่าตัวเลข ❤️ ที่ AppBar เพิ่มขึ้นถูกต้อง ถ่ายภาพหน้าจอแนบส่ง
 
+<img width="1710" height="1112" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 11 36 21" src="https://github.com/user-attachments/assets/3e92e7a0-0006-421f-98e4-6c5e3e088d5f" />
+
+
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
+| Provider                  | Riverpod                     | คำอธิบาย                                                                                |
+| ------------------------- | ---------------------------- | --------------------------------------------------------------------------------------- |
+| `ChangeNotifier`          | `StateNotifier`              | ใช้จัดการและเก็บ State โดย `StateNotifier` เหมาะกับการจัดการ State ในรูปแบบของ Riverpod |
+| `StatelessWidget`         | `ConsumerWidget`             | `ConsumerWidget` สามารถเข้าถึง Provider ผ่าน `ref` ได้โดยไม่ต้องใช้ `BuildContext`      |
+| `context.watch<T>()`      | `ref.watch(provider)`        | ใช้ติดตาม State เมื่อ State เปลี่ยน Widget จะ Rebuild ตามข้อมูลใหม่                     |
+| `context.read<T>()`       | `ref.read(provider)`         | ใช้เข้าถึง State หรือเรียกคำสั่งจาก Provider โดยไม่ต้องติดตามการเปลี่ยนแปลง             |
+| `ChangeNotifierProvider`  | `StateNotifierProvider`      | ใช้ประกาศ Provider เพื่อสร้างและเผยแพร่ State ให้ Widget ที่ต้องการใช้งาน               |
+| `Provider.of<T>(context)` | `ref.read()` / `ref.watch()` | Riverpod ใช้ `ref` แทนการค้นหา Provider ผ่าน `BuildContext`                             |
+
 
 ---
 
@@ -724,7 +748,7 @@ class HomePage extends ConsumerWidget {
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) เพื่อฝึกโยกความสามารถเดียวกันข้ามเครื่องมือ State Management สองแบบ
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์
-```text
+<img width="1710" height="1112" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 13 06 16" src="https://github.com/user-attachments/assets/afc2ab7d-ec48-41a3-9ade-83d3cfc985e6" />
+<img width="1710" height="1112" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 13 06 31" src="https://github.com/user-attachments/assets/54093e2a-1cdd-454c-8d74-f52bb33d144e" />
+<img width="1710" height="1112" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 13 06 35" src="https://github.com/user-attachments/assets/ed742384-7d91-4933-8488-94a5b7170ab9" />
 
-
-```
