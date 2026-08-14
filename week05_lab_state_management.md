@@ -240,10 +240,15 @@ class MyApp extends StatelessWidget {
 
 > ✅ **Checkpoint 1.1** รันแอปและกดปุ่ม "🤍 บันทึกเป็นรายการโปรด" ที่สินค้าชิ้นใดก็ได้ ทดสอบว่า (ก) ตัวเลขในไอคอนหัวใจที่ AppBar เพิ่มขึ้นถูกต้อง และ (ข) ปุ่มของสินค้าที่กดไปแล้วเปลี่ยนเป็น "❤️ บันทึกแล้ว" และกดซ้ำไม่ได้ ถ่ายภาพหน้าจอที่เห็นทั้งสองอย่างนี้พร้อมกัน แล้วเปิดไฟล์ `item_card.dart` และ `item_list_section.dart` ให้เห็น constructor ที่ต้องรับพารามิเตอร์ส่งต่อ (Prop Drilling) ชัดเจน แนบส่งในรายงาน
 
+<img width="1287" height="984" alt="image" src="https://github.com/user-attachments/assets/0609329b-4462-4ce3-b70f-3d495b910b5c" />
+<img width="1069" height="793" alt="image" src="https://github.com/user-attachments/assets/a35a05de-a68e-47a8-b7a6-30014737f6bc" />
+<img width="909" height="747" alt="image" src="https://github.com/user-attachments/assets/00379f0f-b1a1-4de3-a2ad-6d4aaeb63ca3" />
+
+
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
 ```text
-
+ไม่สามารถส่งข้อมูลต่อผ่าน Constructor แบบเดิมได้ เพราะการเปิดหน้าใหม่ข้าม Route ทำให้โครงสร้าง Widget แยกออกจากกัน ขาดการสื่อสารส่งต่อข้อมูล ทำให้ถ้ามีการแก้ไขข้อมูลในหน้าใหม่ หน้าเดิมจะไม่รับรู้และข้อมูลจะไม่ซิงค์กัน
 ```
 
 ---
@@ -499,10 +504,9 @@ class HomePage extends StatelessWidget {
 > ✅ **Checkpoint 2.1** รันแอปใหม่ ทดสอบกดบันทึกสินค้าจากหลายจุด แล้วตรวจว่าตัวเลขที่ AppBar อัปเดตถูกต้องทุกครั้ง โดยที่ไฟล์ `item_list_section.dart` และ `item_card.dart` **ไม่มีพารามิเตอร์ savedItems หรือ onSave หลงเหลือใน constructor แล้ว**
 
 > ✅ **Checkpoint 2.2** ทดสอบว่าเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกันทันที ลองกดปุ่มถังขยะลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง ถ่ายภาพหน้าจอทั้งสองหน้าเทียบกันแนบส่ง
+<img width="1292" height="987" alt="image" src="https://github.com/user-attachments/assets/c59a99a1-a6d6-4a4f-812a-367aabb20345" />
+<img width="1291" height="991" alt="image" src="https://github.com/user-attachments/assets/69fe112d-2104-4500-9b4d-33c01d170a43" />
 
-```image
-
-```
 
 ---
 
@@ -525,6 +529,60 @@ class HomePage extends StatelessWidget {
 บันทึกคำตอบที่ได้จาก Gemini 
 
 ```text
+สำหรับการพัฒนาแอป Flutter ในระดับโครงสร้างที่คุณวางไว้ การเลือกเครื่องมือจัดการ
+State ที่เหมาะสมจะช่วยให้ Code สะอาด (Clean Code) และจัดการได้ง่ายในระยะยาว
+นี่คือบทวิเคราะห์ครับ:
+
+1. Dark Mode / Light Mode
+
+  - เครื่องมือที่แนะนำ: Riverpod (หรือ Provider)
+  - เหตุผล:
+      - Global State: โหมดของธีมเป็นค่าที่ส่งผลกระทบต่อ ทุก Widget ในแอป
+        (มักจะอยู่ที่ Root ของ MaterialApp)
+      - Accessibility: คุณต้องสามารถเปลี่ยนค่านี้ได้จากหน้า "ตั้งค่า" (Settings)
+        และให้มันสะท้อนผลไปยังหน้า "Home" หรือหน้าอื่นๆ ทันที
+      - Riverpod Advantage: การใช้ Riverpod (เช่น StateProvider)
+        จะช่วยให้เข้าถึงสถานะธีมได้จากทุกที่โดยไม่ต้องส่งผ่าน Constructor (Prop
+        Drilling) และจัดการเรื่องการจดจำค่า (Persistence) ได้ง่ายกว่า
+
+2. ตัวนับคนถูกใจ (Sync ระหว่างหน้า List และ Detail)
+
+  - เครื่องมือที่แนะนำ: Riverpod (หรือ Provider)
+  - เหตุผล:
+      - Shared State: ข้อมูลชุดนี้ต้องถูก แชร์ (Sync) กันระหว่าง 2
+        หน้าจอที่อยู่ใน Navigation Stack คนละชั้นกัน
+      - Consistency: หากผู้ใช้กดถูกใจในหน้า "รายละเอียด" (Detail) แล้วกด Back
+        กลับมาหน้า "รายการ" (List) ข้อมูลต้องเป็นตัวเลขเดียวกันทันที
+      - Logic Separation: การใช้ Riverpod ช่วยให้คุณแยก Logic การอัปเดตฐานข้อมูล
+        (Backend/Firebase) ออกจาก UI ได้ชัดเจน ทำให้จัดการ Race Condition (เช่น
+        กดรัวๆ) ได้ดีกว่า
+
+3. Animation กระพริบของไอคอนหัวใจ (เฉพาะตอนกด)
+
+  - เครื่องมือที่แนะนำ: setState
+  - เหตุผล:
+      - Ephemeral State (Local): เป็นสถานะที่เกิดขึ้นชั่วคราวและใช้เฉพาะภายใน
+        Widget นั้นๆ เท่านั้น ไม่มีความจำเป็นต้องให้ Widget อื่นรับรู้
+      - Performance: การใช้ setState ภายใน StatefulWidget เล็กๆ เพื่อคุม
+        AnimationController มีประสิทธิภาพสูงและเขียนง่ายที่สุดสำหรับงานประเภท UI
+        Interaction
+      - Low Complexity: การนำ Riverpod มาสั่งงาน Animation เล็กๆ ในระดับ Pixel
+        จะทำให้ Code ซับซ้อนเกินความจำเป็น (Over-engineering)
+
+สรุปตารางวิเคราะห์
+
+| ฟีเจอร์             | ขอบเขต (Scope)       | เครื่องมือที่เหมาะสม | เหตุผลหลัก                                        |
+| :------------------ | :------------------- | :------------------- | :------------------------------------------------ |
+| **Dark/Light Mode** | ทั้งแอป (Global)     | **Riverpod**         | ต้องคุม Theme ของแอปทั้งหมดจากที่เดียว            |
+| **ตัวนับถูกใจ**     | หลายหน้า (Shared)    | **Riverpod**         | ข้อมูลหน้า List และ Detail ต้องตรงกันเสมอ         |
+| **Animation หัวใจ** | Widget เดียว (Local) | **setState**         | เป็น UI Logic เฉพาะตัว ไม่เกี่ยวกับข้อมูลส่วนกลาง |
+
+คำแนะนำเพิ่มเติม: หากคุณเริ่มใช้ Riverpod แล้ว แนะนำให้ใช้ Riverpod กับข้อ 1
+และ 2 ไปเลยครับ
+เพราะมันถูกออกแบบมาให้จัดการสถานะที่ซับซ้อนและมีการข้ามหน้าได้ดีกว่า Provider
+ในระยะยาว (เช่น การจัดการ Auto-dispose เมื่อหน้านั้นๆ ไม่ได้ถูกใช้งานแล้ว)
+ส่วนข้อ 3 ใช้ StatefulWidget ปกติได้เลยครับ หรือถ้าอยากให้ Code คลีนขึ้นไปอีก
+อาจศึกษา flutter_hooks มาใช้แทน setState สำหรับงาน Animation ครับ
 
 ```
 
@@ -536,12 +594,73 @@ class HomePage extends StatelessWidget {
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
 ```text
+การเลือก State Management ใน Flutter พิจารณาจาก **ขอบเขต (Scope)** และ **อายุการใช้งาน (Lifecycle)** ของข้อมูลในแต่ละฟีเจอร์ ดังนี้:
 
+---
+
+### 1. Dark Mode / Light Mode (ทั่วทั้งแอป)
+
+* **เครื่องมือที่แนะนำ:** **Provider** หรือ **Riverpod** (แนะนำ **Riverpod**)
+* **เหตุผล:** เป็น **App-wide State** ที่อยู่เหนือสุดของ Widget Tree (ระดับ `MaterialApp`) หากใช้ `setState` จะเกิดปัญหา Prop Drilling ต้องส่งค่าผ่าน Widget ทุกชั้น การใช้ Riverpod หรือ Provider ช่วยให้ทุกหน้าจอเข้าถึงและสลับธีมได้ทั่วถึงจากจุดศูนย์กลางโดยตรง
+
+---
+
+### 2. ซิงค์ตัวนับ "ถูกใจ" (หน้ารายการสินค้า $\leftrightarrow$ หน้ารายละเอียด)
+
+* **เครื่องมือที่แนะนำ:** **Riverpod** (หรือ **Provider**)
+* **เหตุผล:** เป็น **Shared / Cross-screen State** ที่สองหน้าจอซึ่งไม่ได้อยู่ใต้ Widget Tree เดียวกันต้องแสดงผลข้อมูลชุดเดียวกันแบบเรียลไทม์ การจัดการผ่าน Riverpod (เช่น `StateNotifierProvider` หรือ `NotifierProvider` ที่เก็บ State ตาม `itemId`) ช่วยให้อัปเดตค่าที่เดียวแล้วรีเฟรชทุกหน้าที่ฟังค่านั้นอยู่ได้ทันที ป้องกันข้อมูลขัดแย้งกัน
+
+---
+
+### 3. Animation กระพริบของไอคอนหัวใจ (เฉพาะใน Widget เดียว)
+
+* **เครื่องมือที่แนะนำ:** **`setState`** (ร่วมกับ `AnimationController` / `StatefulWidget`)
+* **เหตุผล:** เป็น **Ephemeral / Local State** สถานะของแอนิเมชันและการกดเกิดขึ้นและจบลงภายใน Widget นั้นเพียงจุดเดียว ไม่มี Widget อื่นจำเป็นต้องรู้หรือใช้งานค่านั้น การนำ State Management ระดับแอปเข้ามาครอบจะทำให้โค้ดซับซ้อนเกินความจำเป็น (Overengineering)
+
+---
+
+### ตารางสรุปภาพรวม
+
+| ฟีเจอร์ | ขอบเขตของ State | เครื่องมือที่เหมาะสม |
+| --- | --- | --- |
+| **1. Dark/Light Mode** | Global (ทั้งแอป) | **Riverpod** / Provider |
+| **2. ซิงค์ยอด Like ข้ามหน้า** | Shared (หลายหน้าจอ) | **Riverpod** / Provider |
+| **3. Animation หัวใจกระพริบ** | Local (เฉพาะ Widget) | **`setState`** |
 ```
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
 ```text
+"ทำไมฟีเจอร์ Animation ของไอคอนหัวใจถึงไม่ควรนำไปใส่ไว้ใน Provider หรือ Riverpod เพื่อให้จัดการ State เป็นแบบเดียวกันทั้งแอป?"
 
+สาเหตุหลักที่ไม่ควรนำ Animation State ย้ายไปไว้ใน Provider หรือ Riverpod มีดังนี้:
 
+---
+
+### 1. ปัญหา Lifecycle และ Memory Leak (`TickerProvider` / `dispose`)
+
+* Animation ใน Flutter ผูกกับ `AnimationController` ซึ่งจำเป็นต้องใช้ `TickerProvider` (เช่น `SingleTickerProviderStateMixin`) เพื่อดึง Frame Rate 60/120 Hz จากหน้าจอ
+* Controller เหล่านี้ต้องถูกสั่ง `.dispose()` ทันทีที่ Widget ถูกถอดออกจากหน้าจอ (`unmount`)
+* หากนำไปไว้ใน Global/App-level Provider การจัดการจังหวะ Bind และ Dispose ให้ตรงกับวงจรชีวิตของ Widget ในหน้าจอจะทำได้ยากและเสี่ยงต่อ **Memory Leak**
+
+---
+
+### 2. ข้อมูลไม่มีความหมายสำหรับภายนอก (Zero Reusability)
+
+* สถานะของ Animation เช่น *ค่า `0.0` ถึง `1.0` ของสเกล*, *จังหวะเฟรมที่กำลังขยับ* เป็นข้อมูลชั่วคราว (Ephemeral) ที่มีผลต่อการวาดภาพ (Rendering) ของไอคอนหัวใจนั้นชิ้นเดียว
+* ไม่มีหน้าจออื่น ตัวคำนวณราคา หรือ API ตัวไหนจำเป็นต้องรู้ว่า "ตอนนี้ไอคอนหัวใจกำลังขยายขนาดอยู่ที่ขนาด 1.25 หรือยัง" การยกค่านั้นขึ้นไปไว้บน State Management กลางจึงผิดหลักการ Encapsulation
+
+---
+
+### 3. Overhead และความซับซ้อนเกินจำเป็น (Overengineering)
+
+* การใช้ Global State เพื่อขับเคลื่อนการเปลี่ยนแปลงระดับ 60–120 ครั้งต่อวินาที ทำให้เกิดการแจ้งเตือน (Notify listeners) ผ่านตัวกลางโดยไม่จำเป็น
+* การใช้ `StatefulWidget` + `setState` (หรือ `AnimatedBuilder` / `TweenAnimationBuilder`) จบงานได้ตรงจุด ควบคุม Scope การ Rebuild ให้อยู่เฉพาะจุดนั้น และอ่านโค้ดเข้าใจง่ายกว่าการสร้าง Provider ย่อยมารองรับแอนิเมชันของแต่ละปุ่ม
+
+---
+
+### ข้อสรุป
+
+* **สิ่งที่เป็น Business State** (เช่น *สินค้านี้ถูกใจแล้วหรือยัง*, *ยอดไลก์รวมเป็นเท่าไหร่*) $\rightarrow$ **ใส่ใน Riverpod/Provider**
+* **สิ่งที่เป็น UI/Visual Transient State** (เช่น *กำลังเด้งขยาย*, *จังหวะเฟรมของสี*) $\rightarrow$ **เก็บไว้ใน Local Widget ด้วย `setState` / `AnimationController**`
 ```
 
 ⚠️ **ข้อควรระวัง**: AI เป็นเครื่องมือช่วยคิด ไม่ใช่คำตอบสุดท้าย ผู้เรียนต้องอธิบายเหตุผลของการเลือกใช้เครื่องมือได้ด้วยตัวเองเสมอ ตามหลักการใช้ AI ในการพัฒนาซอฟต์แวร์ของวิชานี้
@@ -692,8 +811,10 @@ class HomePage extends ConsumerWidget {
 ```
 
 > ✅ **Checkpoint 4.1** รันแอปด้วย `flutter run` (หรือกด F5 ใน VS Code) แล้วทดสอบกดปุ่ม "บันทึก" ที่สินค้าชิ้นใดก็ได้ ตรวจว่าตัวเลข ❤️ ที่ AppBar เพิ่มขึ้นถูกต้อง ถ่ายภาพหน้าจอแนบส่ง
+<img width="1313" height="991" alt="image" src="https://github.com/user-attachments/assets/0735a64f-0d0a-4ac9-a564-d7fe3bfdaf90" />
 
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
+<img width="876" height="360" alt="image" src="https://github.com/user-attachments/assets/152ae1fa-bb27-4e56-b0ee-cf1c3c6012ba" />
 
 ---
 
@@ -709,7 +830,7 @@ class HomePage extends ConsumerWidget {
 
 - ต้องตัดสินใจเองว่าค่าคำค้นหาควรเป็น Ephemeral State หรือ App State พร้อมให้เหตุผลสั้น ๆ ไว้ในช่องด้านล่าง
   ```text
-
+คำค้นหาควรเป็น App State เพราะต้องการให้ค่าคำค้นหาคงอยู่เมื่อผู้ใช้เปลี่ยนหน้าจอและกลับมาที่หน้า Home อีกครั้ง ผู้ใช้จะไม่ต้องพิมพ์คำค้นหาใหม่ทุกครั้ง ช่วยให้ใช้งานสะดวกขึ้นและลดความหงุดหงิดในการค้นหาสินค้า
   ```
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
 
@@ -721,8 +842,7 @@ class HomePage extends ConsumerWidget {
 
 - ต้องใช้ `context.read` หรือ `context.watch` ให้ถูกต้องตามหลักการ และอธิบายเหตุผลการเลือก ในช่องด้านล่าง
   ```text
-
-
+ใช้ context.read<FavoritesModel>().clear() เพราะเป็นการเรียกเมธอดเพื่อแก้ไขข้อมูลใน FavoritesModel จากการกดปุ่มเพียงครั้งเดียว ไม่จำเป็นต้องให้ปุ่มนี้ rebuild เมื่อข้อมูลเปลี่ยน ส่วนการแสดงรายการและจำนวนรายการใช้ context.watch อยู่แล้ว จึงเลือก context.read ตามหลักการของ Provider.
   ```
 - ปุ่มต้องแสดงเฉพาะเมื่อมีรายการโปรดอย่างน้อย 1 รายการเท่านั้น (ถ้ารายการว่างอยู่แล้วไม่ต้องแสดงปุ่มนี้)
 
@@ -731,7 +851,9 @@ class HomePage extends ConsumerWidget {
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) 
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์ ในช่องด้านล่าง
+<img width="1296" height="895" alt="image" src="https://github.com/user-attachments/assets/01ea2600-39a8-4c42-ab43-45321db8180c" />
+<img width="1290" height="875" alt="image" src="https://github.com/user-attachments/assets/139f9112-0157-4cc4-9e88-10853062671e" />
 ```text
-
-
+ฟีเจอร์ค้นหาเลือกใช้ **App State (Riverpod StateProvider)** เพราะต้องการให้ค่าคำค้นหาสามารถคงอยู่เมื่อผู้ใช้เปลี่ยนหน้าจอและกลับมาที่หน้า Home อีกครั้ง ผู้ใช้ไม่ต้องพิมพ์คำค้นหาใหม่ ทำให้การใช้งานสะดวกและต่อเนื่องมากขึ้น
+ฟีเจอร์ล้างรายการโปรดทั้งหมดใช้ **ref.read(favoritesProvider.notifier).clear()** เพราะเป็นการเรียกเมธอดเพื่อแก้ไข State จากการกดปุ่มเพียงครั้งเดียว ไม่จำเป็นต้องให้ปุ่มนี้ rebuild เมื่อข้อมูลเปลี่ยนแปลง ส่วนการแสดงรายการโปรดใช้ **ref.watch(favoritesProvider)** เพื่อให้ UI อัปเดตอัตโนมัติเมื่อมีการเพิ่ม ลบ หรือเคลียร์รายการโปรดทั้งหมด.
 ```
