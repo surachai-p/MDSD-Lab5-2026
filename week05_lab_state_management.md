@@ -1,5 +1,3 @@
-# ใบงานปฏิบัติสัปดาห์ที่ 5: State Management ด้วย Provider และ Riverpod
-
 **วิชา** การพัฒนาซอฟต์แวร์สำหรับอุปกรณ์เคลื่อนที่ | **เครื่องมือ** Flutter, Provider, Riverpod, Google AI Studio (Gemini API)
 
 
@@ -243,8 +241,10 @@ class MyApp extends StatelessWidget {
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
 ```text
-
+ไม่สามารถส่ง State และ Callbacks ผ่าน Constructor แบบปกติได้ เพราะ Navigator.push เป็นการเปิด Route ใหม่ที่อยู่นอกกิ่ง Widget Tree เดิม
 ```
+<img width="500" alt="check1 1 2" src="https://github.com/user-attachments/assets/01002c45-48d4-412e-93b1-98f03a1329fa" />
+<img width="500" alt="check1 1 1" src="https://github.com/user-attachments/assets/058e4d52-5195-40dc-9087-e0b1cd82590a" />
 
 ---
 
@@ -500,9 +500,12 @@ class HomePage extends StatelessWidget {
 
 > ✅ **Checkpoint 2.2** ทดสอบว่าเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกันทันที ลองกดปุ่มถังขยะลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง ถ่ายภาพหน้าจอทั้งสองหน้าเทียบกันแนบส่ง
 
-```image
 
-```
+<img width="500" alt="check2 1 1" src="https://github.com/user-attachments/assets/e8a45cb1-1565-4149-9a94-e797131c1d4c" />
+<img width="500" alt="check2 1 2" src="https://github.com/user-attachments/assets/060c84e9-6226-4236-b396-3861c33ed2fd" />
+<img width="500" alt="check2 1 3" src="https://github.com/user-attachments/assets/f0268307-9742-4d61-b194-323b2b62ee97" />
+
+
 
 ---
 
@@ -536,12 +539,13 @@ class HomePage extends StatelessWidget {
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
 ```text
-
+ตรงกันเป็นส่วนใหญ้ในด้านของขอบเขตข้อมูล บทเรียนระบุว่าหากใช้ในWidgetเดียว ให้ใช้ setState ซึ่งตรงกับที่ Gemini แนะนำในกรณีAnimation กระพริบของไอคอนหัวใจ
 ```
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
 ```text
-
-
+ขาดเกณฑ์การตัดสินใจเลือกระหว่าง Provider กับ Riverpod
+ในบทเรียน เมื่อข้อมูลต้องใช้หลายหน้าจอ จะมีจุดตัดสินใจเพิ่มเติมคือ "ต้องการ Type Safety และเทสต์ง่ายไหม?"
+แต่ในคำตอบของ Gemini ได้รวบ Provider และ Riverpod ไว้ด้วยกันในข้อ 1 และ 2 โดยไม่ได้อธิบายเกณฑ์เรื่องความปลอดภัยของชนิดข้อมูล
 ```
 
 ⚠️ **ข้อควรระวัง**: AI เป็นเครื่องมือช่วยคิด ไม่ใช่คำตอบสุดท้าย ผู้เรียนต้องอธิบายเหตุผลของการเลือกใช้เครื่องมือได้ด้วยตัวเองเสมอ ตามหลักการใช้ AI ในการพัฒนาซอฟต์แวร์ของวิชานี้
@@ -695,6 +699,8 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
 
+<img width="500" alt="ตาราง" src="https://github.com/user-attachments/assets/5ddf807b-2ab0-4d29-af80-a190cf22b4a5" />
+
 ---
 
 ## ส่วนที่ 5 (ทำด้วยตนเอง): ออกแบบฟีเจอร์เพิ่มด้วยตัวเอง
@@ -709,7 +715,7 @@ class HomePage extends ConsumerWidget {
 
 - ต้องตัดสินใจเองว่าค่าคำค้นหาควรเป็น Ephemeral State หรือ App State พร้อมให้เหตุผลสั้น ๆ ไว้ในช่องด้านล่าง
   ```text
-
+  เลือก Ephemeral State (setState) เพราะ ข้อความที่เราพิมพ์ค้นหาเป็นข้อมูลที่ใช้ชั่วคราวและมีผลแค่บนหน้า Home หน้าเดียวเพื่อกรองรายการสินค้า ม่มีความจำเป็นต้องแชร์ข้อมูลนี้ไปให้หน้าอื่น ๆ
   ```
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
 
@@ -721,7 +727,8 @@ class HomePage extends ConsumerWidget {
 
 - ต้องใช้ `context.read` หรือ `context.watch` ให้ถูกต้องตามหลักการ และอธิบายเหตุผลการเลือก ในช่องด้านล่าง
   ```text
-
+  1. การซ่อน/แสดงปุ่ม เลือกใช้ watch เพราะ เพราะเราต้องการให้หน้าจอคอยดูจำนวนรายการโปรด หากรายการว่างเปล่า UI จะได้รับรู้และอัปเดตเพื่อซ่อนปุ่มทิ้งโดยอัตโนมัติ
+  2. การกดปุ่มเพื่อล้างข้อมูล เลือกใช้ read เพราะเมื่อผู้ใช้กดปุ่มยืนยัน เราเพียงแค่ต้องการส่งคำสั่งไปให้ระบบทำงานล้างข้อมูลเพียงครั้งเดียว
 
   ```
 - ปุ่มต้องแสดงเฉพาะเมื่อมีรายการโปรดอย่างน้อย 1 รายการเท่านั้น (ถ้ารายการว่างอยู่แล้วไม่ต้องแสดงปุ่มนี้)
@@ -732,6 +739,16 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์ ในช่องด้านล่าง
 ```text
+1. ช่องค้นหาสินค้า ใช้ Ephemeral State (setState) เพราะ ป็นข้อมูลชั่วคราวที่มีผลแค่หน้าHomeหน้าเดียวไม่จำเป็นต้องแชร์ไปหน้าอื่น
+2. ปุ่มล้างรายการโปรด App State (Riverpod) เพราะ ข้อมูลรายการโปรดเป็น State ส่วนกลางที่ใช้ร่วมกันหลายหน้า
 
 
 ```
+
+<img width="500" alt="finish1" src="https://github.com/user-attachments/assets/e7f8c7df-e05c-48d4-a469-f716bf440fb2" />
+<img width="500" alt="finish2" src="https://github.com/user-attachments/assets/d651b1a3-5946-4108-9d1c-587062f396f0" />
+<img width="500" alt="finish3" src="https://github.com/user-attachments/assets/bef98912-afcb-4fdd-bc0e-71425c342ef6" />
+<img width="500"  alt="finish4" src="https://github.com/user-attachments/assets/6b6406d4-923b-4aac-8030-cfae6324ff15" />
+
+
+
