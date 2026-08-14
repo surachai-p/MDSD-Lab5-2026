@@ -242,9 +242,12 @@ class MyApp extends StatelessWidget {
 
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
-```text
+จะเกิดปัญหาหลัก 3 อย่าง
+1. ส่งผ่าน State ข้าม Route ลำบาก
+2. ข้อมูลไม่ Sync กันทันที
+3. บำรุงรักษายาก
 
-```
+<img width="1919" height="1011" alt="image" src="https://github.com/user-attachments/assets/2cda7bfd-40e0-4283-9129-07bb2a827a79" />
 
 ---
 
