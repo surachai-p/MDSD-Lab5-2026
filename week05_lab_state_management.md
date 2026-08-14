@@ -731,7 +731,18 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.1** รันแอปด้วย `flutter run` (หรือกด F5 ใน VS Code) แล้วทดสอบกดปุ่ม "บันทึก" ที่สินค้าชิ้นใดก็ได้ ตรวจว่าตัวเลข ❤️ ที่ AppBar เพิ่มขึ้นถูกต้อง ถ่ายภาพหน้าจอแนบส่ง
 
+<img width="541" height="844" alt="Screenshot 2026-08-14 113104" src="https://github.com/user-attachments/assets/33922cf3-6b0a-47ae-8b32-fdbfa5675a48" />
+
+
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
+
+| **ด้าน**                        | **Provider**                                                                              | **Riverpod**                                                                                                                                       |
+| ------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **State class**                 | `ChangeNotifier` (เช่น `FavoritesModel`) + เรียก `notifyListeners()`                      | `StateNotifier` (เช่น `FavoritesNotifier extends StateNotifier<List>`) + ตั้งค่า `state = ...` ก้อนใหม่ทั้งหมด (immutable) แทนการ mutate list เดิม |
+| **การประกาศ provider**          | `ChangeNotifierProvider` ครอบด้วย `MultiProvider`/`ChangeNotifierProvider` ใน widget tree | `StateNotifierProvider<FavoritesNotifier, List>` เป็น top-level final variable + ครอบ app ด้วย `ProviderScope`                                     |
+| **Widget ที่อ่าน state**        | `StatelessWidget` (หรือ `StatefulWidget`) ธรรมดา                                          | `ConsumerWidget` (มี `build(context, ref)`) หรือ `ConsumerStatefulWidget`                                                                          |
+| **การอ่าน/แก้ state ใน widget** | `context.watch()` (อ่าน+rebuild), `context.read()` (เรียก method โดยไม่ rebuild)          | `ref.watch(favoritesProvider)` (อ่าน+rebuild), `ref.read(favoritesProvider.notifier)` (เรียก method บน notifier โดยไม่ rebuild)                    |
+| **การทดสอบ (widget test)**      | ห่อ widget ด้วย `ChangeNotifierProvider` ใน `pumpWidget`                                  | ห่อ widget ด้วย `ProviderScope` ใน `pumpWidget`                                                                                                    |
 
 ---
 
@@ -766,3 +777,11 @@ class HomePage extends ConsumerWidget {
 
 
 ```
+
+<img width="532" height="836" alt="image" src="https://github.com/user-attachments/assets/7a85025e-1b72-4690-8921-750b2741e5e3" />
+
+<img width="535" height="840" alt="image" src="https://github.com/user-attachments/assets/22e74ffc-7a55-4274-9d2a-d1faa7a9ac96" />
+
+Source Code
+- [MDSD-Lab5-2026 / campus_marketplace](https://github.com/Job-67/MDSD-Lab5-2026/tree/campus_marketplace)
+- [MDSD-Lab5-2026 / campus_marketplace_riverpod_trial](https://github.com/Job-67/MDSD-Lab5-2026/tree/campus_marketplace_riverpod_trial)
