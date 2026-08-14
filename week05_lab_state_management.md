@@ -827,8 +827,18 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.1** รันแอปด้วย `flutter run` (หรือกด F5 ใน VS Code) แล้วทดสอบกดปุ่ม "บันทึก" ที่สินค้าชิ้นใดก็ได้ ตรวจว่าตัวเลข ❤️ ที่ AppBar เพิ่มขึ้นถูกต้อง ถ่ายภาพหน้าจอแนบส่ง
 
+<img width="1919" height="1018" alt="image" src="https://github.com/user-attachments/assets/854b6fbc-980b-4897-ad3f-985c80cb41b5" />
+
+
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
 
+| หัวข้อเปรียบเทียบ | Provider | Riverpod |
+| :--- | :--- | :--- |
+| **1. คลาสจัดการ State** | `ChangeNotifier` | `StateNotifier` / `Notifier` |
+| **2. วิดเจ็ตแสดงผล** | `StatelessWidget` | `ConsumerWidget` |
+| **3. การอ่านค่าแบบติดตาม (Rebuild)** | `context.watch<T>()` | `ref.watch(...)` |
+| **4. การอ่านค่าครั้งเดียว (เรียกฟังก์ชัน)** | `context.read<T>()` | `ref.read(...)` |
+| **5. ตัวครอบระดับบนสุด (App Wrapper)** | `MultiProvider` | `ProviderScope` |
 ---
 
 ## ส่วนที่ 5 (ทำด้วยตนเอง): ออกแบบฟีเจอร์เพิ่มด้วยตัวเอง
@@ -858,7 +868,23 @@ class HomePage extends ConsumerWidget {
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) เพื่อฝึกโยกความสามารถเดียวกันข้ามเครื่องมือ State Management สองแบบ
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์
-```text
 
+<img width="1919" height="1020" alt="image" src="https://github.com/user-attachments/assets/52d22a8d-4fc9-4421-b637-a7cc6b47612c" />
+<img width="1919" height="1019" alt="image" src="https://github.com/user-attachments/assets/55575ea8-fdf2-4ac0-a639-a674bdda5952" />
+<img width="1919" height="1017" alt="image" src="https://github.com/user-attachments/assets/dbb01886-1b1a-4edd-a0a5-f1513333f335" />
+<img width="1919" height="1018" alt="image" src="https://github.com/user-attachments/assets/6bb05b1c-dd57-4cf8-a646-57139ae3dc77" />
+<img width="1918" height="1020" alt="image" src="https://github.com/user-attachments/assets/a8f0dbf4-cc63-4746-b9cf-81ca8fb77887" />
 
+```
+เหตุผลการเลือกชนิด State ของทั้ง 2 ฟีเจอร์
+1. ฟีเจอร์ช่องค้นหาสินค้า (Search Box)
+ชนิดของ State ที่เลือกใช้: Ephemeral State (Local State) โดยใช้ setState ภายใน StatefulWidget
+เหตุผล: ข้อมูลคำค้นหา (Search Query) เป็นข้อมูลที่ถูกใช้งานเฉพาะภายในหน้า HomePage เพียงหน้าเดียว เพื่อจุดประสงค์ในการกรอง (Filter) รายการสินค้าที่จะแสดงผลบนหน้าจอนั้น ข้อมูลนี้ไม่มีความจำเป็นต้องแชร์หรือส่งต่อไปให้หน้าจออื่นๆ ในแอปพลิเคชัน (เช่น หน้า FavoritesPage) รับรู้ การเลือกใช้ setState จึงเป็นวิธีที่เหมาะสมที่สุด เพราะจัดการได้ง่าย ตรงจุด และไม่สิ้นเปลืองทรัพยากรการจัดการ State ส่วนกลางของระบบ
+
+2. ฟีเจอร์ปุ่มล้างรายการโปรดทั้งหมด (Clear Favorites Dialog)
+ชนิดของ State ที่เลือกใช้: App State (Shared State / Global State) ผ่านการจัดการด้วย State Management (Provider / Riverpod)
+เหตุผล: ข้อมูล "รายการสินค้าโปรด" เป็นข้อมูลส่วนกลางที่มีผลกระทบต่อหลายหน้าจอ (หน้า Home ต้องรู้ว่าบันทึกอะไรไปบ้างเพื่อเปลี่ยนสถานะปุ่ม และหน้า Favorites ต้องดึงรายการมาแสดง) จึงต้องใช้ App State
+การเลือกใช้คำสั่งสังเกตการณ์:
+การซ่อน/แสดงปุ่ม: เลือกใช้ watch (context.watch หรือ ref.watch) ที่ระดับหน้าจอ เพื่อให้ UI ติดตามจำนวนรายการโปรดตลอดเวลา หากรายการว่างเปล่า ปุ่มถังขยะจะถูกซ่อนอัตโนมัติ (Rebuild UI)
+ปุ่มกดยืนยันใน Dialog: เลือกใช้ read (context.read หรือ ref.read) เพื่อใช้ส่งคำสั่ง clear() ไปที่ Model/Notifier เพียงอย่างเดียว โดยที่ตัวปุ่มกดยืนยันนี้ไม่จำเป็นต้องสมัครรับฟังการเปลี่ยนแปลง (Not listening) เพื่อรีบิลด์ตัวเองซ้ำซ้อน ซึ่งเป็นการลดการทำงานของแอปพลิเคชันให้มีประสิทธิภาพสูงสุดตามหลักการจัดการ State
 ```
