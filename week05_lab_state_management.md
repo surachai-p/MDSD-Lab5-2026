@@ -814,6 +814,12 @@ class HomePage extends ConsumerWidget {
 > ✅ **Checkpoint 4.1** รันแอปด้วย `flutter run` (หรือกด F5 ใน VS Code) แล้วทดสอบกดปุ่ม "บันทึก" ที่สินค้าชิ้นใดก็ได้ ตรวจว่าตัวเลข ❤️ ที่ AppBar เพิ่มขึ้นถูกต้อง ถ่ายภาพหน้าจอแนบส่ง
 
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
+| ข้อเปรียบเทียบ | แบบ Provider (โปรเจกต์หลัก) | แบบ Riverpod (โปรเจกต์ทดลอง) |
+|---|---|---|
+| **1. คลาสจัดการ State** | `class FavoritesModel extends ChangeNotifier` | `class FavoritesNotifier extends StateNotifier<List<Item>>` |
+| **2. การอัปเดตข้อมูล** | `final List<Item> _items = []` + `notifyListeners()` | `state = [...state, item]` (แทนที่ก้อนใหม่ทั้งหมด) |
+| **3. การลงทะเบียน Provider** | ลงทะเบียนด้วย `ChangeNotifierProvider` | ลงทะเบียนด้วย `StateNotifierProvider` |
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/a0a45e4c-3f03-4cbe-ba55-6b12a8855ca4" />
 
 ---
 
@@ -844,7 +850,15 @@ class HomePage extends ConsumerWidget {
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) เพื่อฝึกโยกความสามารถเดียวกันข้ามเครื่องมือ State Management สองแบบ
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/8383de85-3d53-467d-b3ee-52cabc812457" />
+<img width="1920" height="1140" alt="image" src="https://github.com/user-attachments/assets/169c9c39-3059-4f42-9fcf-0641c2fadfdb" />
+
 ```text
+. ช่องค้นหาสินค้า (Search Box):
+- ชนิดของ State ที่เลือก: Ephemeral State (ใช้ StatefulWidget ร่วมกับ setState)
+- เหตุผล: เพราะค่าคำค้นหา (search query) ถูกใช้งานและแสดงผลอยู่เฉพาะภายในหน้าจอหลัก (HomePage) หน้าเดียวเท่านั้น ไม่มีหน้าจออื่นในแอปที่จำเป็นต้องแชร์หรือรับรู้ค่านี้ การใช้ State ภายในวิดเจ็ตจึงเป็นวิธีที่เรียบง่ายและเหมาะสมที่สุดโดยไม่ต้องประกาศผ่าน Provider
 
-
+2. ปุ่ม "ล้างรายการโปรดทั้งหมด" (Clear All Favorites):
+- ชนิดของ State ที่เลือก: App State (จัดการผ่าน StateNotifier และ Riverpod)
+- เหตุผล: เพราะการล้างข้อมูลรายการโปรดเป็นการเปลี่ยนแปลงข้อมูลส่วนกลาง (Global State) ที่ส่งผลกระทบต่อวิดเจ็ตหลายส่วนพร้อมกัน (เช่น ตัวเลข ❤️ ที่ AppBar และรายการสินค้าที่ถูกรีเซ็ต) จึงต้องสั่งการผ่านเมธอดใน FavoritesNotifier และใช้ ref.read(...).clear() เพื่อจัดการข้อมูลข้ามหน้าจอได้อย่างถูกต้อง
 ```
