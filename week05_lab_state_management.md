@@ -568,15 +568,14 @@ class HomePage extends StatelessWidget {
 
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
-```text
-
-```
-- หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
-```text
-
-
-```
-
+จุดที่ตรงกัน 
+  การจำแนกขอบเขตข้อมูล (Scope): Gemini แบ่งประเภทข้อมูลตรงตามบทเรียน คือแยกระหว่าง Ephemeral State (ใช้ Widget เดียว) และ App State (ใช้หลายหน้าจอ)
+  การเลือก setState: สำหรับ Animation หัวใจ (ใช้เฉพาะใน Widget ตัวเอง) Gemini แนะนำให้ใช้ setState ซึ่งตรงกับกรอบบทเรียนที่ระบุว่า หากเป็น "Widget เดียว" ให้เริ่มจาก setState
+  การเลิกใช้ setState เมื่อข้ามหน้า: ทั้งคู่เห็นตรงกันว่า Dark Mode และตัวนับ Like ข้ามหน้าจอ ไม่ควรอ้างอิง setState แต่ต้องขยับไปใช้ State Management ระดับแอป
+  
+จุดที่ต่างกัน (Differences)
+  เงื่อนไขการตัดตัวเลือกระหว่าง Provider กับ Riverpod:
+  ในบทเรียน: มีการแยกเงื่อนไขชัดเจนด้วยคำถาม "ต้องการ Type Safety และเทสต์ง่ายไหม?"
 ⚠️ **ข้อควรระวัง**: AI เป็นเครื่องมือช่วยคิด ไม่ใช่คำตอบสุดท้าย ผู้เรียนต้องอธิบายเหตุผลของการเลือกใช้เครื่องมือได้ด้วยตัวเองเสมอ ตามหลักการใช้ AI ในการพัฒนาซอฟต์แวร์ของวิชานี้
 
 ---
@@ -725,9 +724,19 @@ class HomePage extends ConsumerWidget {
 ```
 
 > ✅ **Checkpoint 4.1** รันแอปด้วย `flutter run` (หรือกด F5 ใน VS Code) แล้วทดสอบกดปุ่ม "บันทึก" ที่สินค้าชิ้นใดก็ได้ ตรวจว่าตัวเลข ❤️ ที่ AppBar เพิ่มขึ้นถูกต้อง ถ่ายภาพหน้าจอแนบส่ง
+<img width="1283" height="697" alt="image" src="https://github.com/user-attachments/assets/c4cbf03f-665f-4c9c-ac91-39f03a2d65fe" />
+<img width="1302" height="376" alt="image" src="https://github.com/user-attachments/assets/027c6b0b-66d2-4e8b-82d9-1f92483a25f1" />
 
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
+ตารางสรุปความแตกต่างและการแปลงโค้ดจาก **Provider** มาเป็น **Riverpod**:
 
+| หัวข้อการใช้งาน | Provider (เดิม) | Riverpod (ใหม่) |
+| :--- | :--- | :--- |
+| **1. คลาสจัดการ State** | `ChangeNotifier` | `StateNotifier<T>` (หรือ `Notifier<T>`) |
+| **2. ชนิดของ Widget** | `StatelessWidget` / `StatefulWidget` | `ConsumerWidget` / `ConsumerStatefulWidget` |
+| **3. การสังเกต/อ่านค่า State** | `context.watch<FavoritesModel>()` | `ref.watch(favoritesProvider)` |
+| **4. การเรียกใช้เมธอด/คำสั่ง** | `context.read<FavoritesModel>().add(...)` | `ref.read(favoritesProvider.notifier).add(...)` |
+| **5. การเปิดใช้งาน Provider ทั้งแอป** | `ChangeNotifierProvider` / `MultiProvider` | `ProviderScope` (ครอบที่จุดเริ่มต้น `runApp`) |
 ---
 
 ## ส่วนที่ 5 (ทำด้วยตนเอง): ออกแบบฟีเจอร์เพิ่มด้วยตัวเอง
@@ -742,8 +751,12 @@ class HomePage extends ConsumerWidget {
 
 - ต้องตัดสินใจเองว่าค่าคำค้นหาควรเป็น Ephemeral State หรือ App State พร้อมให้เหตุผลสั้น ๆ ไว้ในช่องด้านล่าง
   ```text
+ใช้เป็น Ephemeral State เนื่องจากเป็นข้อมูลชั่วคราวที่ใช้เฉพาะหน้า Home เพื่อกรองรายการสินค้าที่กำลังแสดงผลอยู่เท่านั้น 
 
   ```
+<img width="1307" height="327" alt="image" src="https://github.com/user-attachments/assets/95bb163d-4ac0-4fcf-bdac-2d79c1f26bec" />
+<img width="1281" height="577" alt="image" src="https://github.com/user-attachments/assets/4bf15a4e-5142-42b2-b574-b528d934523a" />
+
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
 
 ### โจทย์ที่ 2: ปุ่ม "ล้างรายการโปรดทั้งหมด"
@@ -754,10 +767,12 @@ class HomePage extends ConsumerWidget {
 
 - ต้องใช้ `context.read` หรือ `context.watch` ให้ถูกต้องตามหลักการ และอธิบายเหตุผลการเลือก ในช่องด้านล่าง
   ```text
-
-
+- ใช้  context.watch ในส่วนของการอ่านค่าและตรวจสอบจำนวนรายการ เ
+- ใช้ context.read ใน Event Callback  ตอนที่กดปุ่มยืนยันใน Dialog เนื่องจากเป็นการสั่งงานเกิด Event เท่านั้น 
   ```
 - ปุ่มต้องแสดงเฉพาะเมื่อมีรายการโปรดอย่างน้อย 1 รายการเท่านั้น (ถ้ารายการว่างอยู่แล้วไม่ต้องแสดงปุ่มนี้)
+<img width="1281" height="627" alt="image" src="https://github.com/user-attachments/assets/f5080912-fbd8-4ad0-8536-f82a5d7c3c7f" />
+<img width="1282" height="827" alt="image" src="https://github.com/user-attachments/assets/aabaf96b-9de0-4bd1-b8e0-b451bdacc832" />
 
 ### โจทย์ที่ 3 (ท้าทายเพิ่ม ไม่บังคับ)
 
