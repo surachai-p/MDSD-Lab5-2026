@@ -239,11 +239,21 @@ class MyApp extends StatelessWidget {
 ```
 
 > ✅ **Checkpoint 1.1** รันแอปและกดปุ่ม "🤍 บันทึกเป็นรายการโปรด" ที่สินค้าชิ้นใดก็ได้ ทดสอบว่า (ก) ตัวเลขในไอคอนหัวใจที่ AppBar เพิ่มขึ้นถูกต้อง และ (ข) ปุ่มของสินค้าที่กดไปแล้วเปลี่ยนเป็น "❤️ บันทึกแล้ว" และกดซ้ำไม่ได้ ถ่ายภาพหน้าจอที่เห็นทั้งสองอย่างนี้พร้อมกัน แล้วเปิดไฟล์ `item_card.dart` และ `item_list_section.dart` ให้เห็น constructor ที่ต้องรับพารามิเตอร์ส่งต่อ (Prop Drilling) ชัดเจน แนบส่งในรายงาน
+<img width="1305" height="1097" alt="image" src="https://github.com/user-attachments/assets/2bbd28a9-b5c9-4677-b6db-204066883bfe" />
+
 
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
 ```text
+เนื่องจาก State (_savedItems) ถูกเก็บไว้ภายใน StatefulWidget ของ HomePage เมื่อเราทำการ Navigator.push() เปิดหน้า FavoritesPage ขึ้นมาเป็น Route ใหม่ ทรีของ Widget จะแยกออกจากกัน (คนละ Route) ทำให้ไม่สามารถส่งค่าผ่าน Constructor ของ Widget แบบปกติได้
 
+หากต้องการส่งข้อมูล โค้ดจะเกิดความยุ่งยากดังนี้:
+
+1. ส่งข้อมูลไป: ต้อง passing ข้อมูล _savedItems ข้าม Route ไปยัง FavoritesPage
+
+2. ส่งข้อมูลกลับ: หากต้องการ ลบ/แก้ไข รายการในหน้า FavoritesPage แล้วให้หน้า HomePage อัปเดตตาม ต้องเขียน Callback หรือส่งผลลัพธ์กลับผ่าน Navigator.pop(result) แล้วมาสั่ง setState ซ้ำที่หน้า HomePage
+
+3. เสี่ยงข้อมูลไม่อัปเดต (State Out of Sync): ข้อมูลจะไม่ได้เป็น Single Source of Truth หากมีการแก้ไขข้อมูลจากหลายๆ หน้า อาจเกิดปัญหาข้อมูลในแต่ละหน้าไม่ตรงกันได้
 ```
 
 ---
