@@ -714,6 +714,18 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
 
+4.1
+![](https://github.com/user-attachments/assets/395b2a43-4749-4669-9c34-806f640dddd7)
+
+4.2
+| มิติการเปรียบเทียบ | Provider (ส่วนที่ 2)| Riverpod (ส่วนที่ 4) |
+| --- | --- | --- |
+| 1. คลาสจัดการ State | extends ChangeNotifier (แก้ไขค่าในตัวแปรเดิมแล้วเรียก notifyListeners()) | extends StateNotifier<T> (สร้างและแทนที่ด้วยก้อน State ใหม่แบบ Immutable) |
+| 2. การประกาศ Provider | ประกาศ/ลงทะเบียนไว้ใน Widget Tree (เช่น ใน main.dart หรือเหนือหน้านั้น) | ประกาศเป็นตัวแปรแบบ Top-level / Global variable นอกคลาส |
+| 3. ชนิดของ Widget ที่ใช้งาน |StatelessWidget / StatefulWidget (ต้องพึ่งพา BuildContext) | ConsumerWidget / ConsumerStatefulWidget (ส่ง WidgetRef ref เข้ามาในฟังก์ชัน build) |
+| 4. การดึงค่าและดักฟัง (Listen State) | context.watch<Model>() | ref.watch(provider) |
+| 5. การเรียกฟังก์ชันเพื่อแก้ State | context.read<Model>().method() | ref.read(provider.notifier).method() |
+
 
 
 
