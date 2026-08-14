@@ -240,10 +240,17 @@ class MyApp extends StatelessWidget {
 
 > ✅ **Checkpoint 1.1** รันแอปและกดปุ่ม "🤍 บันทึกเป็นรายการโปรด" ที่สินค้าชิ้นใดก็ได้ ทดสอบว่า (ก) ตัวเลขในไอคอนหัวใจที่ AppBar เพิ่มขึ้นถูกต้อง และ (ข) ปุ่มของสินค้าที่กดไปแล้วเปลี่ยนเป็น "❤️ บันทึกแล้ว" และกดซ้ำไม่ได้ ถ่ายภาพหน้าจอที่เห็นทั้งสองอย่างนี้พร้อมกัน แล้วเปิดไฟล์ `item_card.dart` และ `item_list_section.dart` ให้เห็น constructor ที่ต้องรับพารามิเตอร์ส่งต่อ (Prop Drilling) ชัดเจน แนบส่งในรายงาน
 
+Screenshot
+<img width="1907" height="1013" alt="image" src="https://github.com/user-attachments/assets/398d9a5f-cd71-4639-aa40-babbd8031d2d" />
+<img width="1917" height="1015" alt="image" src="https://github.com/user-attachments/assets/ee424019-0612-4396-b202-ac6443c9e84f" />
+<img width="1917" height="1018" alt="image" src="https://github.com/user-attachments/assets/912987cf-6ddc-47da-8642-38b573063a7f" />
+<img width="1917" height="1012" alt="image" src="https://github.com/user-attachments/assets/ab0014c4-8d3b-42c7-8c3b-bd281d2cd21a" />
+
+
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
 ```text
-
+จะเกิดปัญหา ความยุ่งยากในการซิงก์ข้อมูลและการจัดการ State ข้ามหน้าจอ
 ```
 
 ---
