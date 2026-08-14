@@ -242,9 +242,15 @@ class MyApp extends StatelessWidget {
 
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
-```text
+item_card
+<img width="1470" height="956" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 14 42 25" src="https://github.com/user-attachments/assets/665f727e-57c6-4af1-a476-aa2205f47a56" />
 
-```
+item_list_section
+<img width="1470" height="955" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 14 42 33" src="https://github.com/user-attachments/assets/843141f2-26f5-457f-b8aa-d707413ef6bb" />
+
+screenshot
+<img width="1470" height="956" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 14 42 52" src="https://github.com/user-attachments/assets/4a63dfab-fccc-4fd5-a61a-24dcee914948" />
+
 
 ---
 
@@ -500,9 +506,13 @@ class HomePage extends StatelessWidget {
 
 > ✅ **Checkpoint 2.2** ทดสอบว่าเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกันทันที ลองกดปุ่มถังขยะลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง ถ่ายภาพหน้าจอทั้งสองหน้าเทียบกันแนบส่ง
 
-```image
+screenshot 1
+<img width="1470" height="956" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 13 56 51" src="https://github.com/user-attachments/assets/52373ecd-fc9d-4dc4-91b2-6a1b5366c680" />
 
-```
+screenshot 2
+<img width="1470" height="956" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 13 57 00" src="https://github.com/user-attachments/assets/e14331c6-34fc-47c7-ac17-8f9edc47ea4b" />
+
+
 
 ---
 
@@ -525,7 +535,24 @@ class HomePage extends StatelessWidget {
 บันทึกคำตอบที่ได้จาก Gemini 
 
 ```text
+1. Dark Mode / Light Mode
+ตัวเลือกที่เหมาะสม: Provider หรือ Riverpod
+ประเภท State: Global App State
+เหตุผล:
+สวิตช์เปลี่ยนธีมส่งผลกระทบต่อ UI ของทุกหน้าในแอป การใช้ setState จะทำได้ยากเพราะต้องดัน State ขึ้นไปที่ root (MaterialApp) แล้วส่ง callback ผ่านหลายเลเยอร์ (Prop Drilling) ซึ่งทำให้โค้ดซับซ้อนโดยไม่จำเป็น การใช้ Provider (เช่น ChangeNotifierProvider) หรือ Riverpod (เช่น NotifierProvider) จะช่วยให้เข้าถึงธีมจากหน้าไหนก็ได้ และเมื่อสลับธีม UI ทั้งแอปจะ rebuild ตามทันที
 
+2. ตัวนับ "มีคนถูกใจแล้วกี่คน" (ซิงค์ข้ามหน้า)
+ตัวเลือกที่เหมาะสม: Provider หรือ Riverpod
+ประเภท State: Shared / Domain State
+เหตุผล:
+เมื่อผู้ใช้กดถูกใจในหน้ารายละเอียดสินค้า ข้อมูลตัวนับในหน้ารายการสินค้า (Feed) ก็ต้องอัปเดตตามทันที หากใช้ setState ข้อมูลจะถูกเก็บไว้แยกกันในแต่ละหน้า ทำให้ค่าไม่ตรงกันเมื่อย้อนกลับหน้าเดิม
+การใช้ Riverpod (แนะนำสไตล์ NotifierProvider.family เพื่ออ้างอิงราย Product ID) หรือ Provider จะช่วยเก็บข้อมูลจำนวน Like ไว้ที่ Data Layer กลาง ทำให้ทุก Widget ที่ฟังข้อมูลสินค้าชิ้นเดียวกันอัปเดตพร้อมกันโดยอัตโนมัติ
+
+3. Animation กระพริบของไอคอนหัวใจ
+ตัวเลือกที่เหมาะสม: setState
+ประเภท State: Ephemeral / Local State
+เหตุผล:
+สถานะของการเล่น Animation (เช่น Scale, Fade, Ticking) เป็นข้อมูลชั่วคราวที่มีผลเฉพาะกับ StatefulWidget ของปุ่มหัวใจนั้นเพียงตัวเดียว ไม่จำเป็นต้องให้ Widget อื่นหรือหน้าอื่นรับรู้ การใช้ setState ร่วมกับ AnimationController หรือการใช้ Animated Widgets (เช่น AnimatedScale) เป็นวิธีที่เรียบง่าย ประสิทธิภาพสูงที่สุด ไม่กินทรัพยากร และไม่ทำให้โค้ดซับซ้อนเกินความจำเป็น (Avoid Over-engineering)
 ```
 
 
@@ -536,11 +563,24 @@ class HomePage extends StatelessWidget {
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
 ```text
+ตรงกับกรอบการตัดสินใจในบทเรียน:
+คำตอบของ Gemini ตรงกับหลักการวิเคราะห์ State ใน Flutter ตามบทเรียนหัวข้อ 5.7 โดยใช้เกณฑ์การแบ่งประเภท State ออกเป็น 2 กลุ่มหลัก:
 
+1. Ephemeral State (Local State): ข้อมูลชั่วคราวที่ใช้เฉพาะใน Widget เดียว Gemini แนะนำให้ใช้ setState (เช่น Animation ไอคอนหัวใจ) ซึ่งตรงตามหลักการประหยัดทรัพยากรและไม่ทำให้โค้ดซับซ้อนเกินไป (Avoid Over-engineering)
+2. App / Shared State (Global State): ข้อมูลที่ต้องเข้าถึงจากหลายหน้าหรือกระทบทั้งแอป Gemini แนะนำให้ใช้ Provider หรือ Riverpod (เช่น Theme และ ตัวนับ Like ข้ามหน้า) ซึ่งตรงตามหลักการป้องกัน Prop Drilling และการจัดการ Single Source of Truth
+
+จุดที่ยังต่างหรือไม่ได้ระบุไว้ในคำตอบแรก:
+- ขอบเขตการ Rebuild (Widget Rebuild Scope): Gemini ยังไม่ได้ระบุถึงการแยก Custom Widget เพื่อจำกัด scope ของการ rebuild เมื่อเรียก setState ในข้อ 3
+- การเก็บข้อมูลถาวร (Data Persistence): ในแอป Marketplace จริง การเปลี่ยน Theme หรือ Like Count มักจะต้องบันทึกลลง Local Storage (เช่น SharedPreferences) หรือ Backend ร่วมด้วย
 ```
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
 ```text
+คำถามที่ใช้ถามต่อเพื่อขอเหตุผลเบื้องลึก (Follow-up Question):
+"ถ้าใช้ setState ในไอคอนหัวใจ จะส่งผลกระทบต่อ Performance หรือทำให้ Widget อื่นในหน้าเดียวกัน Rebuild โดยไม่จำเป็นไหม? ควรจัดโครงสร้าง Widget อย่างไรให้ครอบคลุมเรื่อง Widget Scope?"
 
+สเปกการตอบและบันทึกข้อสรุปบทสนทนา:
+- ขอบเขตของ Widget (Widget Scope): การใช้ setState จะสั่ง rebuild เฉพาะ State ของ StatefulWidget นั้นๆ ดังนั้น หากแยกปุ่มหัวใจออกเป็น Custom StatefulWidget เล็ก ๆ (Leaf Widget) การกด setState จะกระทบเฉพาะไอคอนหัวใจเท่านั้น ไม่ได้สั่ง rebuild ทั้งหน้าจอ
+- สรุปบทเรียนที่ได้: การเลือก State Management ไม่ได้ดูแค่แพ็กเกจที่ใช้ (setState vs Provider/Riverpod) แต่ต้องออกแบบ "โครงสร้างของ Widget Tree" ควบคู่กันไปด้วย เพื่อให้การ Rebuild เกิดขึ้นเฉพาะจุดที่จำเป็นจริงๆ
 
 ```
 
@@ -695,6 +735,10 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
 
+screenshort
+<img width="1470" height="956" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 15 13 03" src="https://github.com/user-attachments/assets/ceefc98f-7028-4b41-86a7-f8bcfdb2605c" />
+
+
 ---
 
 ## ส่วนที่ 5 (ทำด้วยตนเอง): ออกแบบฟีเจอร์เพิ่มด้วยตัวเอง
@@ -708,8 +752,9 @@ class HomePage extends ConsumerWidget {
 **ข้อกำหนด**
 
 - ต้องตัดสินใจเองว่าค่าคำค้นหาควรเป็น Ephemeral State หรือ App State พร้อมให้เหตุผลสั้น ๆ ไว้ในช่องด้านล่าง
-  ```text
-
+  ```
+  เลือกเป็น Ephemeral State (Local State) และใช้ setState
+  เหตุผล: คำค้นหา (Search Query) มีผลเฉพาะการกรองรายการสินค้าที่แสดงในหน้า HomePage หน้าเดียวเท่านั้น ไม่มีหน้าจออื่น (เช่น หน้ารายละเอียดสินค้า หรือหน้า Favorites) ที่จำเป็นต้องรับรู้คำค้นหานี้ การใช้ StatefulWidget ร่วมกับ setState หรือ TextEditingController จึงเพียงพอ เบาที่สุด และไม่เพิ่มความซับซ้อนให้โครงสร้างแอป
   ```
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
 
@@ -720,9 +765,9 @@ class HomePage extends ConsumerWidget {
 **ข้อกำหนด**
 
 - ต้องใช้ `context.read` หรือ `context.watch` ให้ถูกต้องตามหลักการ และอธิบายเหตุผลการเลือก ในช่องด้านล่าง
-  ```text
-
-
+  ```
+  เลือกใช้ context.read<FavoritesModel>().clear()
+  เหตุผล: การกดปุ่มล้างรายการโปรดใน AlertDialog เป็นการส่งคำสั่ง Action ทำงานครั้งเดียวเมื่อผู้ใช้ยืนยัน ไม่ได้เป็นการดึงค่ามาแสดงผลบนปุ่ม จึงไม่จำเป็นต้องใช้ context.watch ซึ่งจะทำการสมัครรับข่าวสารและสั่ง Rebuild Widget ปุ่มโดยไม่จำเป็น การใช้ context.read จะช่วยประหยัดการ Rebuild และตรงตามหลักการสั่งงาน Event
   ```
 - ปุ่มต้องแสดงเฉพาะเมื่อมีรายการโปรดอย่างน้อย 1 รายการเท่านั้น (ถ้ารายการว่างอยู่แล้วไม่ต้องแสดงปุ่มนี้)
 
@@ -731,7 +776,28 @@ class HomePage extends ConsumerWidget {
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) 
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์ ในช่องด้านล่าง
-```text
 
+หน้าหลัก
+<img width="1470" height="956" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 15 48 46" src="https://github.com/user-attachments/assets/fc7dd09f-6bd2-4e36-9c2f-5baafd9d0a08" />
+
+ค้นหา
+<img width="1470" height="956" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 15 57 55" src="https://github.com/user-attachments/assets/4b434704-f6c8-46fb-9508-08e5ce984561" />
+
+ล้างรายการโปรดทั้งหมด
+<img width="1470" height="954" alt="ภาพถ่ายหน้าจอ 2569-08-14 เวลา 15 48 59" src="https://github.com/user-attachments/assets/db014e20-b52d-4c6f-b15c-5d4231558318" />
 
 ```
+สรุปการเลือกชนิด State สำหรับทั้ง 2 ฟีเจอร์:
+
+1. ฟีเจอร์ช่องค้นหาสินค้า (Search Box) -> ใช้ Ephemeral State (setState)
+   - ขอบเขตข้อมูลอยู่เฉพาะภายใน StatefulWidget ของ HomePage 
+   - คำค้นหาเป็นสถานะชั่วคราว เมื่อผู้ใช้ออกจากหน้าจอก็ไม่จำเป็นต้องเก็บบันทึกไว้
+   - ประหยัดทรัพยากรและเขียนโค้ดได้กระชับ ไม่ต้องสร้าง Provider ใหม่ให้ซับซ้อนเกินความจำเป็น
+
+2. ฟีเจอร์ล้างรายการโปรดทั้งหมด (Clear Favorites) -> ใช้ App State (Provider)
+   - ข้อมูลรายการโปรดเป็น Single Source of Truth ที่ใช้ร่วมกันหลายหน้า
+   - การเรียกเมธอด clear() ใน FavoritesModel ผ่าน context.read จะส่งผลให้ notifyListeners() ทำงาน และทำให้ทรีที่ฟังด้วย context.watch (เช่น ตัวนับ ❤️ บน AppBar ของ HomePage และ รายการใน FavoritesPage) อัปเดตและเคลียร์ค่าพร้อมกันโดยอัตโนมัติ
+```
+
+
+
