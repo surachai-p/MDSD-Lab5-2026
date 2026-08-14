@@ -243,7 +243,7 @@ class MyApp extends StatelessWidget {
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
 ```text
-
+ พอ state ต้องข้าม Route prop drilling จะพังเรื่อง sync ทางแก้ที่เหมาะกว่าคือยก savedItems ขึ้นไปเป็น shared state ที่ทุกหน้าเข้าถึงได้โดยไม่ต้องส่งผ่าน constructor เช่นใช้ InheritedWidget/Provider/ChangeNotifier/state management อื่น ๆ
 ```
 
 ---
@@ -504,6 +504,10 @@ class HomePage extends StatelessWidget {
 
 ```
 
+<img width="570" height="837" alt="Screenshot 2026-08-14 104603" src="https://github.com/user-attachments/assets/4cb24bc8-dcd5-4813-9dc4-711d8a67afd3" />
+
+<img width="562" height="837" alt="Screenshot 2026-08-14 104614" src="https://github.com/user-attachments/assets/26d42d8e-9b94-4ebb-a562-cb9e17fd2493" />
+
 ---
 
 ## ส่วนที่ 3: ใช้ AI ช่วยเลือกแนวทาง State Management
@@ -525,6 +529,21 @@ class HomePage extends StatelessWidget {
 บันทึกคำตอบที่ได้จาก Gemini 
 
 ```text
+1) Dark Mode / Light Mode → ใช้ Provider (หรือ Riverpod)
+เหตุผล: ค่าธีมต้องส่งผลต่อ "ทุกหน้าจอ" ในแอปพร้อมกัน ไม่ใช่ widget เดียวหรือกิ่งเดียวของทรี
+เป็น App State ชัดเจนตามนิยาม (ขอบเขตการมองเห็นกว้างสุดในแอป, อายุยาวตลอด session)
+ถ้าใช้ setState จะต้องเก็บ state ไว้ที่ root แล้ว prop-drill ค่าธีมลงไปทุกหน้า ซึ่งผิดหลักการเดียวกับปัญหาที่เจอในส่วนที่ 1
+ทางเลือก: ใช้ ChangeNotifierProvider<ThemeModel> ครอบที่ MaterialApp หรือถ้าต้องการ type-safety สูงและมี unit test เข้มงวด ใช้ Riverpod (StateNotifierProvider) แทนได้เช่นกัน
+
+2) ตัวนับ "มีคนถูกใจแล้วกี่คน" ที่ต้องซิงค์ระหว่างหน้ารายการกับหน้ารายละเอียด → ใช้ Provider
+เหตุผล: ข้อมูลต้องแสดงตรงกันใน "สองหน้าจอคนละ Route" (หน้ารายการ ↔ หน้ารายละเอียด) ซึ่งตรงกับนิยาม App State แบบเป๊ะ ๆ (เหมือนกรณี Favorites ในใบงานนี้)
+setState เก็บ state แยกกันคนละหน้าจะทำให้ตัวเลขไม่ sync กัน (หน้าหนึ่งกดถูกใจ อีกหน้าที่เปิดค้างไว้จะไม่อัปเดต)
+ใช้ ChangeNotifier เก็บ Map<itemId, likeCount> แล้ว notifyListeners() ทุกครั้งที่เปลี่ยน ก็เพียงพอ ไม่จำเป็นต้องใช้ Riverpod เว้นแต่ทีมต้องการ type safety/testability สูงขึ้น
+
+3) Animation กระพริบของไอคอนหัวใจ ที่ใช้เฉพาะ widget เดียว → ใช้ setState
+เหตุผล: ขอบเขตของ state (เช่น ตัวแปร bool _isAnimating หรือ AnimationController) ไม่มี widget อื่นในแอปต้องรู้ด้วยเลย เป็น Ephemeral State ตามนิยามตรงตัว
+การเอา Provider มาใช้กับ state ระดับนี้เป็นการ over-engineering เพิ่ม dependency และความซับซ้อนโดยไม่จำเป็น
+ใช้ StatefulWidget + setState หรือ AnimationController ภายใน widget นั้นพอ
 
 ```
 
@@ -536,11 +555,30 @@ class HomePage extends StatelessWidget {
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
 ```text
+Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
+โดยรวมตรงกับกรอบ "เริ่มจาก setState เสมอถ้าอยู่ในขอบเขต widget เดียว → ยกระดับเป็น Provider เมื่อข้าม
+หน้าจอ → ค่อยพิจารณา Riverpod เมื่อต้องการ type safety/unit test เข้มงวด" ทั้งสามข้อจัดกลุ่มถูกตาม
+มิติ "ขอบเขตการมองเห็น" ในตาราง Ephemeral vs App State ของบทเรียน
+
+จุดที่ต่างหรือควรระวัง:
+- AI เสนอ Riverpod เป็น "ทางเลือก" ในข้อ 1 และ 2 แต่ไม่ได้ฟันธงว่าจำเป็นจริง ๆ หรือไม่ ทำให้ผู้เรียนต้อง
+  ตัดสินใจเองว่าโปรเจกต์นี้ (Campus Marketplace ระดับใบงาน) มีความจำเป็นเรื่อง testing/type-safety สูง
+  ขนาดนั้นหรือยัง — ตามกรอบบทเรียนที่บอกว่า Provider "เรียนรู้ง่ายกว่า" ควรเป็นค่าเริ่มต้นก่อน จึงสรุปว่า
+  ใช้ Provider เพียงพอสำหรับทั้งสองกรณีนี้ ไม่จำเป็นต้องรีบไป Riverpod
+- ข้อ 3 AI ตอบถูกต้องตรงกรอบ 100% ไม่มีข้อโต้แย้ง
 
 ```
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
 ```text
 
+คำถามที่ถามเพิ่ม: "ถ้าตัวนับไลก์ในข้อ 2 ต้องอัปเดตแบบ real-time จากหลายผู้ใช้พร้อมกัน
+ยังใช้ Provider พอไหม หรือต้องเปลี่ยนแนวทาง"
+
+คำตอบเพิ่มเติม: Provider/Riverpod จัดการเฉพาะ "state ฝั่ง client" เท่านั้น ถ้าต้องการ sync ข้ามอุปกรณ์/ผู้ใช้
+แบบ real-time ต้องมีชั้น backend (เช่น WebSocket หรือ Firestore stream) ป้อนข้อมูลเข้ามา แล้วให้
+ChangeNotifier/StateNotifier ทำหน้าที่แค่ "ห่อ stream นั้นให้ UI ฟัง" (เช่นใช้ StreamProvider ของ Riverpod
+รับข้อมูลจาก backend โดยตรง) กรณีนี้ Riverpod จะได้เปรียบกว่า Provider เพราะมี StreamProvider ในตัว
+ให้ผูกกับ stream ได้ทันทีโดยไม่ต้องเขียน listener เองเพิ่ม
 
 ```
 
@@ -693,7 +731,18 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.1** รันแอปด้วย `flutter run` (หรือกด F5 ใน VS Code) แล้วทดสอบกดปุ่ม "บันทึก" ที่สินค้าชิ้นใดก็ได้ ตรวจว่าตัวเลข ❤️ ที่ AppBar เพิ่มขึ้นถูกต้อง ถ่ายภาพหน้าจอแนบส่ง
 
+<img width="541" height="844" alt="Screenshot 2026-08-14 113104" src="https://github.com/user-attachments/assets/33922cf3-6b0a-47ae-8b32-fdbfa5675a48" />
+
+
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
+
+| **ด้าน**                        | **Provider**                                                                              | **Riverpod**                                                                                                                                       |
+| ------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **State class**                 | `ChangeNotifier` (เช่น `FavoritesModel`) + เรียก `notifyListeners()`                      | `StateNotifier` (เช่น `FavoritesNotifier extends StateNotifier<List>`) + ตั้งค่า `state = ...` ก้อนใหม่ทั้งหมด (immutable) แทนการ mutate list เดิม |
+| **การประกาศ provider**          | `ChangeNotifierProvider` ครอบด้วย `MultiProvider`/`ChangeNotifierProvider` ใน widget tree | `StateNotifierProvider<FavoritesNotifier, List>` เป็น top-level final variable + ครอบ app ด้วย `ProviderScope`                                     |
+| **Widget ที่อ่าน state**        | `StatelessWidget` (หรือ `StatefulWidget`) ธรรมดา                                          | `ConsumerWidget` (มี `build(context, ref)`) หรือ `ConsumerStatefulWidget`                                                                          |
+| **การอ่าน/แก้ state ใน widget** | `context.watch()` (อ่าน+rebuild), `context.read()` (เรียก method โดยไม่ rebuild)          | `ref.watch(favoritesProvider)` (อ่าน+rebuild), `ref.read(favoritesProvider.notifier)` (เรียก method บน notifier โดยไม่ rebuild)                    |
+| **การทดสอบ (widget test)**      | ห่อ widget ด้วย `ChangeNotifierProvider` ใน `pumpWidget`                                  | ห่อ widget ด้วย `ProviderScope` ใน `pumpWidget`                                                                                                    |
 
 ---
 
@@ -735,3 +784,11 @@ class HomePage extends ConsumerWidget {
 
 
 ```
+
+<img width="532" height="836" alt="image" src="https://github.com/user-attachments/assets/7a85025e-1b72-4690-8921-750b2741e5e3" />
+
+<img width="535" height="840" alt="image" src="https://github.com/user-attachments/assets/22e74ffc-7a55-4274-9d2a-d1faa7a9ac96" />
+
+Source Code
+- [MDSD-Lab5-2026 / campus_marketplace](https://github.com/Job-67/MDSD-Lab5-2026/tree/campus_marketplace)
+- [MDSD-Lab5-2026 / campus_marketplace_riverpod_trial](https://github.com/Job-67/MDSD-Lab5-2026/tree/campus_marketplace_riverpod_trial)
