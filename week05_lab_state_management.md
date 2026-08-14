@@ -242,9 +242,12 @@ class MyApp extends StatelessWidget {
 
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
-```text
+จะเกิดปัญหาหลัก 3 อย่าง
+1. ส่งผ่าน State ข้าม Route ลำบาก
+2. ข้อมูลไม่ Sync กันทันที
+3. บำรุงรักษายาก
 
-```
+<img width="1919" height="1011" alt="image" src="https://github.com/user-attachments/assets/2cda7bfd-40e0-4283-9129-07bb2a827a79" />
 
 ---
 
@@ -500,9 +503,9 @@ class HomePage extends StatelessWidget {
 
 > ✅ **Checkpoint 2.2** ทดสอบว่าเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกันทันที ลองกดปุ่มถังขยะลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง ถ่ายภาพหน้าจอทั้งสองหน้าเทียบกันแนบส่ง
 
-```image
+<img width="1919" height="1015" alt="image" src="https://github.com/user-attachments/assets/e140efb9-a018-4084-9121-bd43e58707bb" />
 
-```
+<img width="1919" height="1014" alt="image" src="https://github.com/user-attachments/assets/33e803f7-83e4-4d2b-ad67-cb83f483ddb6" />
 
 ---
 
@@ -524,7 +527,53 @@ class HomePage extends StatelessWidget {
 
 บันทึกคำตอบที่ได้จาก Gemini 
 
-```text
+```
+สำหรับการเลือกใช้ State Management ในแอป Flutter ของคุณ
+ผมขอวิเคราะห์และแนะนำดังนี้ครับ:
+
+1. Dark Mode / Light Mode
+
+เครื่องมือที่แนะนำ: Riverpod (หรือ Provider)
+
+  - เหตุผล: เป็น Global State ที่ต้องส่งผลกระทบต่อทั้งแอปพลิเคชัน (MaterialApp)
+    การใช้ Riverpod/Provider จะช่วยให้คุณเก็บค่า ThemeMode ไว้ในที่เดียว
+    และเมื่อมีการเปลี่ยนแปลง ทุก Widget ที่ฟังค่านี้อยู่จะ Rebuild
+    เพื่อเปลี่ยนสีตามทันที โดยไม่ต้องส่งค่าผ่าน Constructor ให้ยุ่งยาก
+
+2. ตัวนับ "จำนวนคนถูกใจ" (Sync ระหว่างหน้า)
+
+เครื่องมือที่แนะนำ: Riverpod (หรือ Provider)
+
+  - เหตุผล: เป็น Shared State ที่มีการใช้งานข้ามหน้า (Cross-page) หากคุณใช้
+    setState ในหน้ารายละเอียด เมื่อกดย้อนกลับมาหน้ารายการ ข้อมูลจะไม่ถูกอัปเดต
+    การใช้ Riverpod จะช่วยให้ข้อมูล "จำนวนถูกใจ" ของสินค้าชิ้นนั้นๆ ถูกเก็บไว้ใน
+    Data Layer กลาง ทำให้ไม่ว่าจะเปลี่ยนค่าที่หน้าไหน
+    ทุกหน้าที่มีสินค้าชิ้นนั้นอยู่จะแสดงเลขที่ตรงกันเสมอ
+
+3. Animation กระพริบของไอคอนหัวใจ
+
+เครื่องมือที่แนะนำ: setState (ภายใน StatefulWidget)
+
+  - เหตุผล: เป็น Ephemeral State (State ชั่วคราว) ที่เกิดขึ้นเฉพาะจุดและจบลงใน
+    Widget นั้นๆ การใช้ setState ร่วมกับ AnimationController เหมาะสมที่สุด
+    เพราะให้ประสิทธิภาพสูงสุด (Low overhead) และไม่จำเป็นต้องเอา Logic
+    การเคลื่อนไหวของ UI ไปปนกับ Business Logic ใน Provider/Riverpod
+
+สรุปตารางการเลือกใช้
+
+| ฟีเจอร์                           | เครื่องมือที่ควรใช้            | ประเภทของ State          |
+| :------------------------------ | :---------------------- | :----------------------- |
+| **Dark/Light Mode**             | **Riverpod / Provider** | Global State             |
+| **ตัวนับถูกใจ (Sync ข้ามหน้า)**     | **Riverpod / Provider** | App State / Shared State |
+| **Animation ไอคอนหัวใจ**        | **setState**            | Local / UI State         |
+
+ข้อแนะนำเพิ่มเติม:
+
+หากโปรเจกต์นี้เป็นโปรเจกต์ใหม่และต้องการขยายขนาดในอนาคต แนะนำให้ใช้ Riverpod
+เป็นหลัก ครับ เพราะจัดการเรื่อง Dependency Injection ได้ดีกว่า
+และช่วยให้การเขียน Code สะอาดกว่า Provider ในระยะยาว ส่วน setState
+ให้เก็บไว้ใช้เฉพาะเรื่องเล็กๆ น้อยๆ ภายใน Widget เดียว เช่น การคีย์ข้อมูลใน Form
+หรือ Animation สั้นๆ ครับ
 
 ```
 
@@ -535,13 +584,19 @@ class HomePage extends StatelessWidget {
 
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
-```text
+```
+จุดที่ตรงกัน
+- Animation ไอคอนหัวใจ AI แนะนำให้ใช้ setState เนื่องจากเป็น State ชั่วคราว ที่เกิดขึ้นเฉพาะจุดใน Widget เดียว ซึ่งตรงกับบทเรียนที่ระบุว่า “ข้อมูลใช้ Widget เดียว ให้ใช้ setState”
+- Dark/Light Mode และ ตัวนับถูกใจ AI แนะนำให้ใช้ Provider หรือ Riverpod เพราะเป็นการจัดการข้อมูลที่ต้องส่งผลทั้งแอปหรือข้ามหน้าจอ ซึ่งตรงกับบทเรียนที่ให้ขยายจาก setState ไปใช้เครื่องมืออื่นเมื่อข้อมูลถูกใช้ “หลายหน้าจอ”
 
+จุดที่ต่างกัน
+ลำดับการเลือกใช้ (Provider vs. Riverpod)
+- บทเรียน เน้นหลักปฏิบัติว่า "เริ่มจาก setState แล้วขยับไป Provider ก่อน" หากโปรเจกต์ไม่ได้เน้น Type Safety สูง หรือการทดสอบอัตโนมัติ ที่ซับซ้อน ไม่จำเป็นต้องรีบย้ายไป Riverpod
+- คำตอบ AI แนะนำ Riverpod เป็นตัวเลือกแรก พร้อมเสนอแนะเพิ่มเติมตอนท้ายให้ใช้ Riverpod เป็นหลักหากเป็นโปรเจกต์ใหม่ ซึ่งเป็นการกระโดดข้ามขั้นตามกรอบบทเรียนที่ให้พิจารณาความต้องการด้าน Type Safety และ Testability ก่อน
 ```
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
-```text
-
-
+```
+เนื่องจาก AI เชียร์ให้ใช้ Riverpod เป็นหลัก แต่ยังไม่ได้วิเคราะห์ขอบเขตเรื่อง Type Safety และการทำ Unit Test ตามกรอบในบทเรียน
 ```
 
 ⚠️ **ข้อควรระวัง**: AI เป็นเครื่องมือช่วยคิด ไม่ใช่คำตอบสุดท้าย ผู้เรียนต้องอธิบายเหตุผลของการเลือกใช้เครื่องมือได้ด้วยตัวเองเสมอ ตามหลักการใช้ AI ในการพัฒนาซอฟต์แวร์ของวิชานี้
@@ -693,7 +748,17 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.1** รันแอปด้วย `flutter run` (หรือกด F5 ใน VS Code) แล้วทดสอบกดปุ่ม "บันทึก" ที่สินค้าชิ้นใดก็ได้ ตรวจว่าตัวเลข ❤️ ที่ AppBar เพิ่มขึ้นถูกต้อง ถ่ายภาพหน้าจอแนบส่ง
 
+<img width="1919" height="1017" alt="image" src="https://github.com/user-attachments/assets/dd34e22c-7310-4015-8548-9f6e1da00cd2" />
+
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
+
+| รายการ / บริบท | Provider | Riverpod |
+|---|---|---|
+| Class จัดการ State | `ChangeNotifier` |  `StateNotifier` (หรือ Notifier ในเวอร์ชันใหม่) |
+|  Widget สำหรับ UI | `StatelessWidget` | `ConsumerWidget` |
+| การดึง/อ่านค่าใน UI | `context.watch<T>() / context.read<T>()` | `ref.watch(provider) / ref.read(provider)` |
+| การสร้าง Provider | `ChangeNotifierProvider(...)` | `StateNotifierProvider(...) (หรือ NotifierProvider)` |
+| Root ของแอปพลิเคชัน | `MultiProvider(providers: [...], child: MyApp())` | `ProviderScope(child: MyApp())` |
 
 ---
 
@@ -708,10 +773,16 @@ class HomePage extends ConsumerWidget {
 **ข้อกำหนด**
 
 - ต้องตัดสินใจเองว่าค่าคำค้นหาควรเป็น Ephemeral State หรือ App State พร้อมให้เหตุผลสั้น ๆ ไว้ในช่องด้านล่าง
-  ```text
-
+  ```
+  ข้อความค้นหา (_searchQuery) เป็นข้อมูลชั่วคราวที่มีขอบเขตการใช้งานอยู่เฉพาะในหน้า HomePage เพื่อกรองข้อมูลสินค้าลง ItemListSection เท่านั้น ไม่มีความจำเป็นต้องแชร์คำค้นหานี้ไปยังหน้าอื่น ๆ ของแอป การเลือก ใช้ setState ภายใน StatefulWidget เป็นเครื่องมือที่เบา เหมาะสม และไม่สร้างความซับซ้อนเกินจำเป็น
   ```
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
+
+<img width="1919" height="1011" alt="image" src="https://github.com/user-attachments/assets/bcf8bf2b-0490-449e-8e64-a941b48f0aaa" />
+
+<img width="1919" height="1011" alt="image" src="https://github.com/user-attachments/assets/163028bb-1371-46b2-8cf5-4aea9c75400f" />
+
+<img width="1919" height="1016" alt="image" src="https://github.com/user-attachments/assets/254a5af1-1ca5-4c41-bd21-0365ae61d241" />
 
 ### โจทย์ที่ 2: ปุ่ม "ล้างรายการโปรดทั้งหมด"
 
@@ -720,11 +791,17 @@ class HomePage extends ConsumerWidget {
 **ข้อกำหนด**
 
 - ต้องใช้ `context.read` หรือ `context.watch` ให้ถูกต้องตามหลักการ และอธิบายเหตุผลการเลือก ในช่องด้านล่าง
-  ```text
-
+  ```
+  - เหตุผลการใช้ context.watch ใช้ใน build() ของหน้า FavoritesPage เพื่อคอยฟังการเปลี่ยนแปลงของ FavoritesModel โดยตรง ช่วยให้สามารถเช็คเงื่อนไข favorites.items.isNotEmpty เพื่อแสดงหรือซ่อนปุ่มล้างรายการโปรดบน AppBar ได้โดยอัตโนมัติ
+  
+  - เหตุผลการใช้ context.read ใช้ในปุ่มกดยืนยันของ AlertDialog สำหรับสั่งเรียกฟังก์ชัน context.read<FavoritesModel>().clear() เนื่องจากเป็น Event การทำงานที่เกิดขึ้นเพียงครั้งเดียวเมื่อผู้ใช้กดปุ่ม ไม่ต้องการให้ตัว Callback นี้ติดตามการ Rebuild ของ UI
 
   ```
 - ปุ่มต้องแสดงเฉพาะเมื่อมีรายการโปรดอย่างน้อย 1 รายการเท่านั้น (ถ้ารายการว่างอยู่แล้วไม่ต้องแสดงปุ่มนี้)
+
+<img width="1919" height="1014" alt="image" src="https://github.com/user-attachments/assets/05cd02dd-21f0-4f39-bd3d-cef5d60b11b4" />
+
+<img width="1919" height="1015" alt="image" src="https://github.com/user-attachments/assets/2c88b7fc-66c6-429a-9c24-85a5a96921e6" />
 
 ### โจทย์ที่ 3 (ท้าทายเพิ่ม ไม่บังคับ)
 
