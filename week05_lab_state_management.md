@@ -799,7 +799,32 @@ class HomePage extends ConsumerWidget {
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) เพื่อฝึกโยกความสามารถเดียวกันข้ามเครื่องมือ State Management สองแบบ
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์
-```text
+``
+<img width="1317" height="992" alt="image" src="https://github.com/user-attachments/assets/24938c48-384c-4192-86d8-0891127fdcc8" />
 
+<img width="1282" height="992" alt="image" src="https://github.com/user-attachments/assets/b347b63c-1ebf-497b-b790-d0a807e68c3b" />
 
-```
+<img width="1293" height="981" alt="image" src="https://github.com/user-attachments/assets/92bb8842-3b23-4e8c-90f5-212909f1c6b9" />
+
+<img width="1285" height="985" alt="image" src="https://github.com/user-attachments/assets/1fa9fc54-0d1f-4494-82cc-9b27d40f7785" />
+
+<img width="1297" height="986" alt="image" src="https://github.com/user-attachments/assets/b176882c-4c0b-4589-a7ff-e61deea8288d" />
+
+### 📝 อธิบายเหตุผลการเลือกชนิด State (Checkpoint 5.1)
+
+#### 1. ฟีเจอร์ช่องค้นหาสินค้า (Search Box)
+* **ประเภทของ State:** `Ephemeral State` (Local State)
+* **เครื่องมือที่เลือกใช้** `setState` ภายใน `StatefulWidget` (`HomePage`)
+* **เหตุผลในการตัดสินใจ** 
+  คำค้นหา (`searchQuery`) ถูกใช้เพื่อกรองรายการสินค้าเฉพาะภายในหน้า `HomePage` เท่านั้น ไม่มีหน้าจออื่นในแอปพลิเคชันที่ต้องใช้ข้อมูลคำค้นหานี้ การเลือกใช้ `setState` เป็นวิธีที่เรียบง่าย น้ำหนักเบา ตรงตามวัตถุประสงค์ โดยไม่จำเป็นต้องใช้ Provider เข้ามาจัดการให้ซับซ้อนเกินความจำเป็น
+
+---
+
+#### 2. ฟีเจอร์ปุ่ม "ล้างรายการโปรดทั้งหมด" (Clear All)
+* **ประเภทของ State** `App State`
+* **เครื่องมือที่เลือกใช้** `context.read<FavoritesModel>().clear()` ร่วมกับ `showDialog` + `AlertDialog`
+* **เหตุผลในการตัดสินใจ** 
+  * **การใช้ App State** เนื่องจากข้อมูลรายการโปรดเป็นข้อมูลส่วนกลางที่ต้องซิงค์กันหลายจุด การล้างข้อมูลจึงต้องส่งผลกระทบต่อ `FavoritesModel` เพื่อให้จำนวนตัวเลขบน AppBar และหน้าอื่นๆ อัปเดตตามทันที
+  * **การใช้ `context.read`** เลือกใช้ `context.read` ใน Event ของปุ่มกด (OnPressed) เพราะเป็นการสั่ง Action ให้ฟังก์ชัน `clear()` ทำงานเพียงครั้งเดียวเมื่อเกิดเหตุการณ์ ไม่ใช่การสมัครรับข้อมูลเพื่อ Rebuild UI ซ้ำๆ
+  * **การควบคุมการแสดงผล UI** ปุ่มรูปถังขยะถูกตั้งเงื่อนไขให้แสดงเฉพาะเมื่อ `favorites.items.isNotEmpty` เพื่อซ่อนปุ่มเมื่อไม่มีรายการสินค้า ป้องกันการกดล้างข้อมูลในขณะที่รายการว่างเปล่า
+``
