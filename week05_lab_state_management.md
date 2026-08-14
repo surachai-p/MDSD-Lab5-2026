@@ -768,6 +768,12 @@ class HomePage extends ConsumerWidget {
   ```
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
 
+<img width="1919" height="1011" alt="image" src="https://github.com/user-attachments/assets/bcf8bf2b-0490-449e-8e64-a941b48f0aaa" />
+
+<img width="1919" height="1011" alt="image" src="https://github.com/user-attachments/assets/163028bb-1371-46b2-8cf5-4aea9c75400f" />
+
+<img width="1919" height="1016" alt="image" src="https://github.com/user-attachments/assets/254a5af1-1ca5-4c41-bd21-0365ae61d241" />
+
 ### โจทย์ที่ 2: ปุ่ม "ล้างรายการโปรดทั้งหมด"
 
 สังเกตว่า `FavoritesModel` มีเมธอด `clear()` เตรียมไว้ให้แล้วตั้งแต่ขั้นตอนที่ 2.2 แต่ยังไม่เคยถูกเรียกใช้งานจากที่ใดเลย ให้เพิ่มปุ่มในหน้า `FavoritesPage` ที่เรียกใช้เมธอดนี้ พร้อมแสดง Dialog ยืนยันก่อนล้างข้อมูลจริง (ใช้ `showDialog` + `AlertDialog`)
@@ -781,6 +787,10 @@ class HomePage extends ConsumerWidget {
   ```
 - ปุ่มต้องแสดงเฉพาะเมื่อมีรายการโปรดอย่างน้อย 1 รายการเท่านั้น (ถ้ารายการว่างอยู่แล้วไม่ต้องแสดงปุ่มนี้)
 
+<img width="1919" height="1014" alt="image" src="https://github.com/user-attachments/assets/05cd02dd-21f0-4f39-bd3d-cef5d60b11b4" />
+
+<img width="1919" height="1015" alt="image" src="https://github.com/user-attachments/assets/2c88b7fc-66c6-429a-9c24-85a5a96921e6" />
+
 ### โจทย์ที่ 3 (ท้าทายเพิ่ม ไม่บังคับ)
 
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) 
@@ -790,15 +800,3 @@ class HomePage extends ConsumerWidget {
 
 
 ```
-
-### โจทย์ที่ 1
-<img width="1919" height="1011" alt="image" src="https://github.com/user-attachments/assets/bcf8bf2b-0490-449e-8e64-a941b48f0aaa" />
-
-<img width="1919" height="1011" alt="image" src="https://github.com/user-attachments/assets/163028bb-1371-46b2-8cf5-4aea9c75400f" />
-
-<img width="1919" height="1016" alt="image" src="https://github.com/user-attachments/assets/254a5af1-1ca5-4c41-bd21-0365ae61d241" />
-
-### โจทย์ที่ 2
-<img width="1919" height="1014" alt="image" src="https://github.com/user-attachments/assets/05cd02dd-21f0-4f39-bd3d-cef5d60b11b4" />
-
-<img width="1919" height="1015" alt="image" src="https://github.com/user-attachments/assets/2c88b7fc-66c6-429a-9c24-85a5a96921e6" />
