@@ -240,7 +240,7 @@ class MyApp extends StatelessWidget {
 
 > ✅ **Checkpoint 1.1** รันแอปและกดปุ่ม "🤍 บันทึกเป็นรายการโปรด" ที่สินค้าชิ้นใดก็ได้ ทดสอบว่า (ก) ตัวเลขในไอคอนหัวใจที่ AppBar เพิ่มขึ้นถูกต้อง และ (ข) ปุ่มของสินค้าที่กดไปแล้วเปลี่ยนเป็น "❤️ บันทึกแล้ว" และกดซ้ำไม่ได้ ถ่ายภาพหน้าจอที่เห็นทั้งสองอย่างนี้พร้อมกัน แล้วเปิดไฟล์ `item_card.dart` และ `item_list_section.dart` ให้เห็น constructor ที่ต้องรับพารามิเตอร์ส่งต่อ (Prop Drilling) ชัดเจน แนบส่งในรายงาน
 
-checkout1.png
+![Checkpoint 1.1 - Prop Drilling Demo](checkpiont1.1/checkout1.png)
 
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ
 
@@ -500,12 +500,12 @@ class HomePage extends StatelessWidget {
 
 > ✅ **Checkpoint 2.1** รันแอปใหม่ ทดสอบกดบันทึกสินค้าจากหลายจุด แล้วตรวจว่าตัวเลขที่ AppBar อัปเดตถูกต้องทุกครั้ง โดยที่ไฟล์ `item_list_section.dart` และ `item_card.dart` **ไม่มีพารามิเตอร์ savedItems หรือ onSave หลงเหลือใน constructor แล้ว**
 
-checkout2_1.png
+![Checkpoint 2.1 - Provider Refactor](checkout2/checkout2_1.png)
 
 > ✅ **Checkpoint 2.2** ทดสอบว่าเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกันทันที ลองกดปุ่มถังขยะลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง ถ่ายภาพหน้าจอทั้งสองหน้าเทียบกันแนบส่ง
 
-checkout2_2.png
-checlout2_3.png
+![Checkpoint 2.2 - Favorites Sync (Home Page)](checkout2/checkout2_2.png)
+![Checkpoint 2.2 - Favorites Sync (Favorites Page)](checkout2/checlout2_3.png)
 
 ---
 
@@ -747,7 +747,7 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.1** รันแอปด้วย `flutter run` (หรือกด F5 ใน VS Code) แล้วทดสอบกดปุ่ม "บันทึก" ที่สินค้าชิ้นใดก็ได้ ตรวจว่าตัวเลข ❤️ ที่ AppBar เพิ่มขึ้นถูกต้อง ถ่ายภาพหน้าจอแนบส่ง
 
-checkout_4_1.png
+![Checkpoint 4.1 - Riverpod Trial](checkpiont4.1/checkout_4_1.png)
 
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
 
@@ -780,7 +780,7 @@ checkout_4_1.png
 
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
 
-answer1_1.png
+![โจทย์ที่ 1 - Search Box Feature](โจทย์1/answer1_1.png)
 
 ### โจทย์ที่ 2: ปุ่ม "ล้างรายการโปรดทั้งหมด"
 
@@ -797,8 +797,8 @@ answer1_1.png
 
 - ปุ่มต้องแสดงเฉพาะเมื่อมีรายการโปรดอย่างน้อย 1 รายการเท่านั้น (ถ้ารายการว่างอยู่แล้วไม่ต้องแสดงปุ่มนี้)
 
-answer2_1.png
-answer2_2.png
+![โจทย์ที่ 2 - Clear All Favorites Button](โจทย์2/answer2_1.png)
+![โจทย์ที่ 2 - Clear All Confirmation Dialog](โจทย์2/answer2_2.png)
 
 ### โจทย์ที่ 3 (ท้าทายเพิ่ม ไม่บังคับ)
 
@@ -811,8 +811,8 @@ answer2_2.png
 2. ฟีเจอร์ล้างรายการโปรดทั้งหมด (Clear All Favorites): เลือกใช้ App State (Provider/Riverpod) ร่วมกับเมธอด clear() ใน FavoritesModel เพราะรายการโปรดเป็นข้อมูลส่วนกลางที่ต้องซิงค์กันทั่วทั้งแอป การล้างข้อมูลต้องส่งผลให้ทั้งหน้า Favorites และไอคอนหัวใจบน AppBar ของหน้า Home อัปเดตพร้อมกันทันที
 ```
 
-answer3_1.png
-answer3_2.png
-answer3_3.png
-answer3_4.png
-answer3_5.png
+![Checkpoint 5.1 / โจทย์ที่ 3 - Riverpod Demo 1](โจทย์3/answer3_1.png)
+![Checkpoint 5.1 / โจทย์ที่ 3 - Riverpod Demo 2](โจทย์3/answer3_2.png)
+![Checkpoint 5.1 / โจทย์ที่ 3 - Riverpod Demo 3](โจทย์3/answer3_3.png)
+![Checkpoint 5.1 / โจทย์ที่ 3 - Riverpod Demo 4](โจทย์3/answer3_4.png)
+![Checkpoint 5.1 / โจทย์ที่ 3 - Riverpod Demo 5](โจทย์3/answer3_5.png)
