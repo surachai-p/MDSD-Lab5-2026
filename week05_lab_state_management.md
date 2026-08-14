@@ -730,7 +730,8 @@ class HomePage extends ConsumerWidget {
 
 สังเกตว่า `FavoritesModel` มีเมธอด `clear()` เตรียมไว้ให้แล้วตั้งแต่ขั้นตอนที่ 2.2 แต่ยังไม่เคยถูกเรียกใช้งานจากที่ใดเลย ให้เพิ่มปุ่มในหน้า `FavoritesPage` ที่เรียกใช้เมธอดนี้ พร้อมแสดง Dialog ยืนยันก่อนล้างข้อมูลจริง (ใช้ `showDialog` + `AlertDialog`)
 <img width="1893" height="1025" alt="image" src="https://github.com/user-attachments/assets/e1da6867-921f-4d6b-9923-84d81712ae2f" />
-![Uploading image.png…]()
+<img width="1907" height="1016" alt="image" src="https://github.com/user-attachments/assets/bb52f6c6-5056-4276-939f-927c25cf130f" />
+
 
 **ข้อกำหนด**
 
