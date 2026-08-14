@@ -1,22 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'models/item.dart';
+import 'models/favorites_model.dart';
 import 'widgets/item_list_section.dart';
+import 'favorites_page.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
+  // เปลี่ยนจาก StatefulWidget เป็น StatelessWidget ได้เลย เพราะไม่ต้องเก็บ State ใด ๆ ไว้เองอีกแล้ว
   const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  final List<Item> _savedItems = []; // เก็บรายการโปรดไว้ใน State ของ HomePage เอง (ยังไม่ใช้ Provider)
-
-  void _onSave(Item item) {
-    setState(() {
-      _savedItems.add(item); // แก้ไข List แล้วสั่ง rebuild ทั้งทรีที่อยู่ใต้ HomePage
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,17 +15,23 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Campus Marketplace'),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: Center(child: Text('❤️ ${_savedItems.length}')),
+          IconButton(
+            icon: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.favorite),
+                // .watch ทำให้ตัวเลขนี้อัปเดตเองทุกครั้งที่ FavoritesModel เปลี่ยน ไม่ว่าจะเปลี่ยนจากจุดไหน
+                Text(' ${context.watch<FavoritesModel>().itemCount}'),
+              ],
+            ),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const FavoritesPage()),
+            ),
           ),
         ],
       ),
-      body: ItemListSection(
-        catalog: catalog,       // มาจาก item.dart ที่สร้างไว้ในขั้นตอนที่ 1.1
-        savedItems: _savedItems, // ต้องส่งลงไปให้ ItemListSection แม้มันไม่ได้ใช้เอง
-        onSave: _onSave,         // ส่งฟังก์ชันลงไปเช่นกัน — รวมเป็น "Prop Drilling" 2 ชั้น
-      ),
+      body: ItemListSection(catalog: catalog),
     );
   }
 }

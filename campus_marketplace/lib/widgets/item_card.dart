@@ -1,22 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/item.dart';
+import '../models/favorites_model.dart';
 
 class ItemCard extends StatelessWidget {
-  final Item item;
-  final List<Item> savedItems; // ต้องรับมาเพื่อเช็คว่าไอเทมนี้ถูกบันทึกแล้วหรือยัง (Prop Drilling)
-  final void Function(Item item) onSave; // ฟังก์ชันที่ถูกส่งทอดมาจาก HomePage ผ่าน ItemListSection
+  final Item item; // เหลือแค่พารามิเตอร์เดียว ไม่ต้องรับ savedItems/onSave อีกต่อไป
 
-  const ItemCard({
-    super.key,
-    required this.item,
-    required this.savedItems,
-    required this.onSave,
-  });
+  const ItemCard({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
-    // เช็คว่าไอเทมนี้ถูกบันทึกไปแล้วหรือยัง โดยเทียบ id กับรายการที่ส่งเข้ามา
-    final alreadySaved = savedItems.any((i) => i.id == item.id);
+    // .watch ที่นี่เพื่อให้ปุ่มอัปเดตสถานะ "บันทึกแล้ว" ทันทีที่ FavoritesModel เปลี่ยนจากจุดใดก็ตาม
+    final favorites = context.watch<FavoritesModel>();
+    final alreadySaved = favorites.items.any((i) => i.id == item.id);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -24,8 +20,15 @@ class ItemCard extends StatelessWidget {
         title: Text(item.title),
         subtitle: Text('฿${item.price.toStringAsFixed(0)}'),
         trailing: ElevatedButton(
-          // ปิดปุ่ม (onPressed: null) ถ้าบันทึกไปแล้ว ป้องกันการกดซ้ำสร้างรายการซ้ำ
-          onPressed: alreadySaved ? null : () => onSave(item),
+          onPressed: alreadySaved
+              ? null
+              : () {
+                  // .read ที่นี่เพราะเป็นคำสั่งครั้งเดียวตอนกด ไม่ต้องการสมัครรับการอัปเดตซ้ำ
+                  context.read<FavoritesModel>().add(item);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('บันทึก ${item.title} ไว้ในรายการโปรดแล้ว')),
+                  );
+                },
           child: Text(alreadySaved ? '❤️ บันทึกแล้ว' : '🤍 บันทึกเป็นรายการโปรด'),
         ),
       ),
