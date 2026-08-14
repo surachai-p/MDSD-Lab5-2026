@@ -745,7 +745,7 @@ class HomePage extends ConsumerWidget {
 
 - ต้องตัดสินใจเองว่าค่าคำค้นหาควรเป็น Ephemeral State หรือ App State พร้อมให้เหตุผลสั้น ๆ ไว้ในช่องด้านล่าง
   ```text
-
+คำตอบ : Ephemeral State เพราะข้อความคำค้นหา (Search Query) ถูกใช้งานอยู่แค่ภายในหน้า Home เพียงหน้าเดียว เพื่อใช้กรองรายการสินค้าที่จะแสดงผลในหน้านั้น ไม่ได้มีหน้าจออื่น (เช่น FavoritesPage) จำเป็นต้องแชร์หรืออ่านค่าคำค้นหานี้ด้วย การใช้เพียง setState ใน StatefulWidget จึงเป็นเครื่องมือที่เบา เรียบง่าย และเพียงพอต่อการใช้งาน โดยไม่จำเป็นต้องใช้ Provider
   ```
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
 
@@ -757,7 +757,7 @@ class HomePage extends ConsumerWidget {
 
 - ต้องใช้ `context.read` หรือ `context.watch` ให้ถูกต้องตามหลักการ และอธิบายเหตุผลการเลือก ในช่องด้านล่าง
   ```text
-
+context.read<FavoritesModel>().clear() เพราะการล้างข้อมูลเป็น Callback Action ที่เกิดขึ้นครั้งเดียวเมื่อผู้ใช้กดยืนยันใน Dialog ไม่ได้ต้องการให้ปุ่มหรือ Dialog คอย Subscribe/Rebuild ตัวเองตามการเปลี่ยนแปลงของข้อมูล ซึ่งตามหลักการจัดการ State ของ Provider หากเป็นการสั่งรันคำสั่ง (Event Trigger) ให้ใช้ context.read()
 
   ```
 - ปุ่มต้องแสดงเฉพาะเมื่อมีรายการโปรดอย่างน้อย 1 รายการเท่านั้น (ถ้ารายการว่างอยู่แล้วไม่ต้องแสดงปุ่มนี้)
@@ -767,7 +767,15 @@ class HomePage extends ConsumerWidget {
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) 
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์ ในช่องด้านล่าง
-```text
+
+![](https://github.com/user-attachments/assets/e75826c1-8e1a-4074-a475-63a5988d073d)
+![](https://github.com/user-attachments/assets/dcdfaa2d-2bf6-4033-a0fc-2c7d253b0937)
+![](https://github.com/user-attachments/assets/ad7619eb-0ccd-43e3-88c1-dbd4ca7d0f4b)
+![](https://github.com/user-attachments/assets/07c4c255-621d-462a-a08f-4a68a8b4d3e3)
+
+
+
+
 
 
 ```
