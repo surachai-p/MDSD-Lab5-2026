@@ -242,7 +242,7 @@ class MyApp extends StatelessWidget {
 
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
-```text
+โค้ดแบบ Prop Drilling ไม่สามารถส่ง savedItems ข้าม Route ไปยัง FavoritesPage ได้โดยตรง ทำให้ต้องหาวิธีจัดการและส่งข้อมูลข้ามหน้าจอเพิ่มขึ้น ส่งผลให้โค้ดซับซ้อนและดูแลยาก
 
 ```
 
@@ -500,7 +500,10 @@ class HomePage extends StatelessWidget {
 
 > ✅ **Checkpoint 2.2** ทดสอบว่าเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกันทันที ลองกดปุ่มถังขยะลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง ถ่ายภาพหน้าจอทั้งสองหน้าเทียบกันแนบส่ง
 
-```image
+<img width="1354" height="993" alt="image" src="https://github.com/user-attachments/assets/7b4d6a8d-0270-49d9-93b1-9818bb314d52" />
+<img width="946" height="999" alt="image" src="https://github.com/user-attachments/assets/df45701a-c871-4722-b18e-1a4fcdb5bb0b" />
+
+
 
 ```
 
@@ -524,7 +527,18 @@ class HomePage extends StatelessWidget {
 
 บันทึกคำตอบที่ได้จาก Gemini 
 
-```text
+1.  Dark/Light Mode -> Riverpod
+    เหตุผล: เป็น Global State ที่ส่งผลทั้งแอป
+    ต้องเข้าถึงและเปลี่ยนค่าได้จากทุกหน้า
+
+2.  ตัวนับ Like (Sync ข้อมูล) -> Riverpod
+    เหตุผล: เป็น Shared State ที่ต้องใช้ข้อมูลชุดเดียวกัน (Source of Truth)
+    เพื่อให้อัปเดตพร้อมกันทั้งหน้ารายการและหน้ารายละเอียด
+
+3.  Animation หัวใจ -> setState
+    เหตุผล: เป็น Local State ที่ใช้เฉพาะจุด (Ephemeral) ไม่มีการแชร์ข้อมูลกับ
+    Widget อื่น จัดการจบภายในตัวมันเองได้เลยครับ
+
 
 ```
 
@@ -535,7 +549,7 @@ class HomePage extends StatelessWidget {
 
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
-```text
+Gemini ตอบได้ ตรงตามทฤษฎีในบทเรียน แต่มีการ Update เทคโนโลยี ให้เป็นปัจจุบัน (เลือก Riverpod) และเน้นที่ผลลัพธ์การใช้งานจริง (User Experience) มากกว่าการอธิบายแค่ลำดับชั้นของ Widget
 
 ```
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
@@ -695,7 +709,13 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
 
----
+<img width="925" height="1002" alt="image" src="https://github.com/user-attachments/assets/20d0279a-7c4a-4977-90fa-e6f819ac10b4" />
+Provider	Riverpod
+ChangeNotifier	StateNotifier
+ChangeNotifierProvider	StateNotifierProvider
+StatelessWidget	ConsumerWidget
+context.watch<T>()	ref.watch(provider)
+context.read<T>()	ref.read(provider.notifier)
 
 ## ส่วนที่ 5 (ทำด้วยตนเอง): ออกแบบฟีเจอร์เพิ่มด้วยตัวเอง
 
@@ -708,7 +728,7 @@ class HomePage extends ConsumerWidget {
 **ข้อกำหนด**
 
 - ต้องตัดสินใจเองว่าค่าคำค้นหาควรเป็น Ephemeral State หรือ App State พร้อมให้เหตุผลสั้น ๆ ไว้ในช่องด้านล่าง
-  ```text
+  คำค้นหาเป็น Ephemeral State เพราะมีความหมายเฉพาะในหน้า Home และไม่ได้จำเป็นต้องใช้ร่วมกับหน้าจออื่น จึงเลือกใช้ setState ซึ่งเป็นวิธีที่ง่ายและเหมาะสมกับขอบเขตของข้อมูล
 
   ```
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
@@ -720,7 +740,7 @@ class HomePage extends ConsumerWidget {
 **ข้อกำหนด**
 
 - ต้องใช้ `context.read` หรือ `context.watch` ให้ถูกต้องตามหลักการ และอธิบายเหตุผลการเลือก ในช่องด้านล่าง
-  ```text
+ เลือกใช้ context.watch เพราะต้องการให้ Widget ติดตามค่า FavoritesModel และ rebuild อัตโนมัติเมื่อจำนวนรายการโปรดเปลี่ยนแปลง ส่วน context.read เหมาะกับการอ่านค่าโดยไม่ต้องติดตามการเปลี่ยนแปลงของ State.
 
 
   ```
@@ -731,7 +751,12 @@ class HomePage extends ConsumerWidget {
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) 
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์ ในช่องด้านล่าง
-```text
+<img width="930" height="1005" alt="image" src="https://github.com/user-attachments/assets/738cf2f2-dd5b-43f7-93fb-a330c4b75c73" />
+<img width="922" height="998" alt="image" src="https://github.com/user-attachments/assets/c5c7adf1-9afd-45b8-8f5e-7ebb63d7448f" />
+<img width="916" height="1001" alt="image" src="https://github.com/user-attachments/assets/f33a5681-944b-4e63-a402-1b5936ce7c66" />
+Search Box เป็น Ephemeral State เพราะใช้เฉพาะในหน้า Home จึงใช้ setState ได้เหมาะสม ส่วน รายการโปรด เป็น App State เพราะต้องใช้ร่วมกันระหว่างหลายหน้าจอ เช่น Home และ FavoritesPage จึงใช้ Provider เพื่อให้ทุกหน้าจอเข้าถึงและอัปเดต State ชุดเดียวกัน
+
+
 
 
 ```
