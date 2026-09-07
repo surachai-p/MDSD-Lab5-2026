@@ -243,7 +243,7 @@ class MyApp extends StatelessWidget {
 **คำถาม**: ถ้าต้องเพิ่มหน้าจอ `FavoritesPage` ที่ต้องแสดงรายการที่บันทึกไว้ชุดเดียวกัน แต่ถูก push แยกออกไปเป็นอีก Route หนึ่ง จะเกิดปัญหาอะไรกับโค้ดแบบ Prop Drilling นี้ จงเขียนคำตอบสั้น ๆ 
 
 ```text
-
+จะเกิดปัญหาว่า FavoritesPage อยู่อีก Route และไม่ใช่ลูกหลานที่รับพารามิเตอร์จาก HomePage โดยตรง จึงต้องส่งรายการโปรดผ่าน constructor หรือสร้าง State ซ้ำอีกชุด ทำให้ข้อมูลอาจไม่ตรงกันและเกิด prop drilling/การจัดการ State ที่ซับซ้อนขึ้น หาก HomePage ถูก dispose รายการโปรดก็อาจหายไปด้วย
 ```
 
 ---
@@ -500,9 +500,11 @@ class HomePage extends StatelessWidget {
 
 > ✅ **Checkpoint 2.2** ทดสอบว่าเมื่อบันทึกสินค้าจากหน้า Home แล้วกดไปหน้า Favorites ตัวเลขและรายการสินค้าตรงกันทันที ลองกดปุ่มถังขยะลบสินค้าออกจากหน้า Favorites แล้วย้อนกลับไปหน้า Home ดูว่าปุ่มของสินค้านั้นกลับมากดซ้ำได้อีกครั้ง ถ่ายภาพหน้าจอทั้งสองหน้าเทียบกันแนบส่ง
 
-```image
+<img width="725" height="587" alt="image" src="https://github.com/user-attachments/assets/b82a7754-0969-4af6-b412-62ec62fd59cc" />
+<img width="725" height="587" alt="image" src="https://github.com/user-attachments/assets/5a6ce484-8555-4c1f-a135-42ff263e4ac0" />
+<img width="725" height="587" alt="image" src="https://github.com/user-attachments/assets/bb4550d4-69ec-42f4-b4b3-db2fbb5876e5" />
+<img width="725" height="587" alt="image" src="https://github.com/user-attachments/assets/44df421e-003a-4ff7-af3c-fea5aadaf8b3" />
 
-```
 
 ---
 
@@ -525,7 +527,11 @@ class HomePage extends StatelessWidget {
 บันทึกคำตอบที่ได้จาก Gemini 
 
 ```text
+คำตอบตัวอย่างจาก Gemini:
 
+1. Dark Mode / Light Mode: ใช้ Provider หรือ Riverpod เพราะเป็น App State ที่หลายหน้าจอต้องอ่านร่วมกัน และการเปลี่ยนค่าต้องทำให้ทั้งแอป rebuild โดย Riverpod เหมาะกว่าเมื่อโปรเจกต์ต้องการ Type Safety และการทดสอบที่ชัดเจน
+2. ตัวนับจำนวนคนถูกใจ: ใช้ Provider หรือ Riverpod เพราะเป็น App State ที่ต้องซิงค์ระหว่างหน้ารายการกับหน้ารายละเอียดสินค้า หากเป็นโปรเจกต์ขนาดเล็ก Provider ก็เพียงพอ แต่ Riverpod เหมาะกับข้อมูลที่มีหลายส่วนและต้องการ Unit Test
+3. Animation กระพริบของไอคอนหัวใจ: ใช้ setState เพราะเป็น Ephemeral State ที่มีความหมายเฉพาะใน Widget เดียวและมีอายุสั้น ไม่จำเป็นต้องกระจายไปทั้งแอป
 ```
 
 
@@ -536,12 +542,15 @@ class HomePage extends StatelessWidget {
 - Gemini แนะนำตรงกับกรอบการตัดสินใจในบทเรียนหรือไม่ มีจุดใดที่ต่างกัน
   
 ```text
-
+โดยรวม Gemini แนะนำตรงกับกรอบการตัดสินใจของบทเรียน คือใช้ setState กับ Animation ที่อยู่ใน Widget เดียว และใช้ Provider หรือ Riverpod กับ State ที่ต้องแชร์ข้ามหน้าจอ ความแตกต่างคือกรอบในบทเรียนแนะนำให้เริ่มจาก Provider เมื่อเป็น App State และค่อยเลือก Riverpod เมื่อมีความต้องการด้าน Unit Test หรือ Type Safety สูง ส่วนคำตอบของ Gemini เสนอ Provider หรือ Riverpod ควบคู่กันและให้น้ำหนัก Riverpod มากกว่าเมื่อโปรเจกต์ซับซ้อน นอกจากนี้ Gemini ไม่ได้ระบุชัดว่าขอบเขตของ State ควรครอบทั้งแอปหรือเฉพาะ subtree จึงต้องพิจารณาขอบเขตจริงเพิ่มเติม
 ```
 - หากคำตอบของ Gemini ดูสมเหตุสมผลแต่ยังไม่ครบถ้วน (เช่น ไม่ได้พูดถึงขอบเขตของ Widget) ให้ลองถามคำถามต่อเพื่อขอเหตุผลเพิ่มเติม แล้วบันทึกบทสนทนาไว้ด้วย
 ```text
+คำถามต่อ Gemini:
+ฟีเจอร์ Dark Mode และตัวนับจำนวนคนถูกใจควรประกาศ Provider/Riverpod ไว้ที่ระดับใดของ Widget Tree และควรใช้ watch/read ตรงส่วนใด เพื่อไม่ให้ Widget ที่ไม่เกี่ยวข้อง rebuild โดยไม่จำเป็น ช่วยอธิบายโดยแยกกรณี State ที่ครอบทั้งแอปกับ State ที่จำกัดเฉพาะหน้าจอด้วย
 
-
+คำตอบต่อยอด:
+Dark Mode ควรประกาศไว้เหนือ MaterialApp หรือใน ProviderScope ที่ครอบทั้งแอป เพราะทุก Route ต้องเห็นค่าเดียวกัน ส่วนตัวนับจำนวนคนถูกใจควรอยู่ใน Provider ที่เข้าถึงได้ทั้งหน้ารายการและหน้ารายละเอียด แต่ถ้ามีเฉพาะสินค้ากลุ่มหนึ่งก็จำกัด Provider ไว้เหนือ subtree นั้นได้ Widget ที่แสดงค่าปัจจุบันใช้ watch ส่วน callback ของปุ่มที่สั่งเพิ่มหรือลดค่าใช้ read เพื่อไม่สมัครรับการ rebuild โดยไม่จำเป็น
 ```
 
 ⚠️ **ข้อควรระวัง**: AI เป็นเครื่องมือช่วยคิด ไม่ใช่คำตอบสุดท้าย ผู้เรียนต้องอธิบายเหตุผลของการเลือกใช้เครื่องมือได้ด้วยตัวเองเสมอ ตามหลักการใช้ AI ในการพัฒนาซอฟต์แวร์ของวิชานี้
@@ -695,6 +704,16 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 4.2** เขียนตารางเปรียบเทียบสั้น ๆ ว่าตอนแปลงจาก Provider เป็น Riverpod ต้องเปลี่ยนอะไรบ้าง (เช่น `ChangeNotifier` → `StateNotifier`, `StatelessWidget` → `ConsumerWidget`, `context.watch` → `ref.watch`) อย่างน้อย 4 คู่เทียบ
 
+| Provider | Riverpod | ความหมาย |
+|---|---|---|
+| `ChangeNotifier` | `StateNotifier<List<Item>>` | วิธีเก็บและเปลี่ยน State |
+| `ChangeNotifierProvider` | `StateNotifierProvider` | การประกาศ Provider |
+| `StatelessWidget` | `ConsumerWidget` | Widget ที่รับ `ref` เพื่อเข้าถึง Provider |
+| `context.watch<T>()` | `ref.watch(provider)` | อ่านค่าและติดตามการเปลี่ยนแปลง |
+| `context.read<T>()` | `ref.read(provider.notifier)` | เรียกเมธอดแก้ไขค่าโดยไม่ติดตามการเปลี่ยนแปลง |
+| `notifyListeners()` | `state = newState` | กลไกแจ้งให้ผู้ฟัง rebuild |
+| `ChangeNotifierProvider` ครอบใน `runApp` | `ProviderScope` ครอบใน `runApp` | จุดเริ่มต้นของระบบ State |
+
 ---
 
 ## ส่วนที่ 5 (ทำด้วยตนเอง): ออกแบบฟีเจอร์เพิ่มด้วยตัวเอง
@@ -709,7 +728,7 @@ class HomePage extends ConsumerWidget {
 
 - ต้องตัดสินใจเองว่าค่าคำค้นหาควรเป็น Ephemeral State หรือ App State พร้อมให้เหตุผลสั้น ๆ ไว้ในช่องด้านล่าง
   ```text
-
+ค่าคำค้นหาเป็น Ephemeral State เพราะใช้เฉพาะใน HomePage เพื่อควบคุมรายการที่แสดง และไม่มีหน้าจออื่นจำเป็นต้องอ่านค่าค้นหานี้ เมื่อออกจากหน้า ค่าค้นหาก็ไม่จำเป็นต้องคงอยู่ ดังนั้นใช้ `setState` ใน `StatefulWidget` ก็เพียงพอและเบากว่า Provider
   ```
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
 
@@ -721,8 +740,7 @@ class HomePage extends ConsumerWidget {
 
 - ต้องใช้ `context.read` หรือ `context.watch` ให้ถูกต้องตามหลักการ และอธิบายเหตุผลการเลือก ในช่องด้านล่าง
   ```text
-
-
+ใช้ `context.read<FavoritesModel>()` ใน callback ของปุ่มและใน callback ยืนยันของ Dialog เพราะเป็นการเรียกคำสั่งครั้งเดียวเพื่อแก้ข้อมูล ไม่ต้องการให้ปุ่มหรือ callback สมัครรับการ rebuild ส่วน `context.watch<FavoritesModel>()` ใช้ใน `build` เพื่ออ่าน `items` และให้หน้าอัปเดตเมื่อรายการถูกล้าง
   ```
 - ปุ่มต้องแสดงเฉพาะเมื่อมีรายการโปรดอย่างน้อย 1 รายการเท่านั้น (ถ้ารายการว่างอยู่แล้วไม่ต้องแสดงปุ่มนี้)
 
@@ -731,7 +749,114 @@ class HomePage extends ConsumerWidget {
 ทำโจทย์ที่ 1 และ 2 ซ้ำอีกครั้งในโปรเจกต์ทดลอง Riverpod (ส่วนที่ 4) 
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์ ในช่องด้านล่าง
+<img width="725" height="587" alt="image" src="https://github.com/user-attachments/assets/48b215f6-14b9-4e57-b8a3-62ed79627cd3" />
+<img width="725" height="587" alt="image" src="https://github.com/user-attachments/assets/cc9f2320-6235-4c80-9206-d4028e5ae092" />
+
 ```text
-
-
+โจทย์ที่ 1 ใช้ Ephemeral State และ `setState` เพราะคำค้นหามีขอบเขตเฉพาะ HomePage ส่วนโจทย์ที่ 2 ใช้ App State เดิมคือ `FavoritesModel` เพราะรายการโปรดถูกใช้ร่วมกันระหว่าง HomePage และ FavoritesPage ปุ่มล้างรายการจึงเรียก `context.read<FavoritesModel>().clear()` หลังผู้ใช้ยืนยัน และใช้ `context.watch<FavoritesModel>()` ใน `build` เพื่อซ่อนหรือแสดงปุ่มตามจำนวนรายการ รวมทั้งอัปเดตหน้าจอหลังล้างข้อมูล
 ```
+
+### โค้ดที่ใช้ทำโจทย์ที่ 1 และ 2
+
+เนื่องจาก `HomePage` ต้องเก็บคำค้นหาด้วย `setState` ให้แทนที่ `home_page.dart` ด้วยโค้ดนี้ ส่วนการอ่านรายการโปรดยังคงใช้ Provider ตามส่วนที่ 2
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'models/item.dart';
+import 'models/favorites_model.dart';
+import 'widgets/item_list_section.dart';
+import 'favorites_page.dart';
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final filteredCatalog = catalog.where((item) {
+      return item.title.toLowerCase().contains(_query.toLowerCase());
+    }).toList();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Campus Marketplace'),
+        actions: [
+          IconButton(
+            icon: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.favorite),
+                Text(' ${context.watch<FavoritesModel>().itemCount}'),
+              ],
+            ),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const FavoritesPage()),
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: TextField(
+              decoration: const InputDecoration(
+                labelText: 'ค้นหาสินค้า',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) => setState(() => _query = value),
+            ),
+          ),
+          Expanded(child: ItemListSection(catalog: filteredCatalog)),
+        ],
+      ),
+    );
+  }
+}
+```
+
+ใน `favorites_page.dart` ให้เพิ่มปุ่มล้างรายการไว้ใน `AppBar.actions` และเรียก Dialog ยืนยันก่อนใช้ `clear()` ดังนี้
+
+```dart
+actions: [
+  if (favorites.items.isNotEmpty)
+    IconButton(
+      icon: const Icon(Icons.delete_sweep_outlined),
+      tooltip: 'ล้างรายการโปรดทั้งหมด',
+      onPressed: () async {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('ล้างรายการโปรดทั้งหมด?'),
+            content: const Text('รายการที่บันทึกไว้ทั้งหมดจะถูกลบ'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('ยกเลิก'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('ล้างรายการ'),
+              ),
+            ],
+          ),
+        );
+
+        if (confirmed == true && context.mounted) {
+          context.read<FavoritesModel>().clear();
+        }
+      },
+    ),
+],
+```
+
+โค้ดส่วนนี้ต้องอยู่ภายใน `Scaffold` ของ `FavoritesPage` และใช้ตัวแปร `favorites` ที่อ่านด้วย `context.watch<FavoritesModel>()` ใน `build` อยู่แล้ว หากต้องการแนบภาพตาม Checkpoint ให้รันแอปจริงแล้วถ่ายภาพหน้า Home ขณะกรองสินค้า และ Dialog ก่อนยืนยันการล้างรายการ
