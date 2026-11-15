@@ -712,7 +712,7 @@ class HomePage extends ConsumerWidget {
 
   ```
 - ถ้าตัดสินใจว่าเป็น Ephemeral State ห้ามใช้ Provider สำหรับฟีเจอร์นี้ ให้ฝึกเลือกใช้เครื่องมือที่เบาที่สุดที่เพียงพอ (`setState` ธรรมดา)
-
+ตอบ คำค้นหาถูกใช้เฉพาะหน้า Home เท่านั้น ไม่มีหน้าจออื่นจำเป็นต้องรับรู้ค่าคำค้นหา จึงไม่จำเป็นต้องใช้ Provider สามารถจัดการด้วย setState() ได้โดยตรง
 ### โจทย์ที่ 2: ปุ่ม "ล้างรายการโปรดทั้งหมด"
 
 สังเกตว่า `FavoritesModel` มีเมธอด `clear()` เตรียมไว้ให้แล้วตั้งแต่ขั้นตอนที่ 2.2 แต่ยังไม่เคยถูกเรียกใช้งานจากที่ใดเลย ให้เพิ่มปุ่มในหน้า `FavoritesPage` ที่เรียกใช้เมธอดนี้ พร้อมแสดง Dialog ยืนยันก่อนล้างข้อมูลจริง (ใช้ `showDialog` + `AlertDialog`)
@@ -732,6 +732,47 @@ class HomePage extends ConsumerWidget {
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอฟีเจอร์ค้นหาที่กรองสินค้าได้ถูกต้อง และภาพ Dialog ยืนยันการล้างรายการโปรด เขียนอธิบายเหตุผลการเลือกชนิด State ของทั้งสองฟีเจอร์ ในช่องด้านล่าง
 ```text
+ควรใช้ Provider เพราะ FavoritesModel เป็น State ที่หน้า Favorites ต้องติดตาม และอาจมี Widget อื่นในแอปที่ต้องรับรู้การเปลี่ยนแปลงของรายการโปรดด้วย
 
-
+final favorites = context.watch<FavoritesModel>();
+favorites.items.isNotEmpty
+if (favorites.items.isNotEmpty)
+  ElevatedButton.icon(
+    icon: Icon(Icons.delete),
+    label: Text('ล้างรายการโปรดทั้งหมด'),
+    onPressed: () {
+      // แสดง Dialog ยืนยัน
+    },
+  ),
+void _showClearDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (dialogContext) {
+      return AlertDialog(
+        title: Text('ยืนยันการล้างรายการโปรด'),
+        content: Text(
+          'คุณต้องการล้างรายการโปรดทั้งหมดใช่หรือไม่?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+            },
+            child: Text('ยกเลิก'),
+          ),
+          TextButton(
+            onPressed: () {
+              context.read<FavoritesModel>().clear();
+              Navigator.pop(dialogContext);
+            },
+            child: Text('ยืนยัน'),
+          ),
+        ],
+      );
+    },
+  );
+}
+onPressed: () {
+  _showClearDialog(context);
+},
 ```
